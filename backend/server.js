@@ -151,6 +151,11 @@ io.on('connection', (socket) => {
   socket.on('join_meeting', (meetingId) => {
     socket.join(`meeting-${meetingId}`);
     console.log(`User joined meeting: ${meetingId}`);
+    
+    // Notify other participants in the room that a new peer has joined
+    socket.to(`meeting-${meetingId}`).emit('participant_joined', {
+      socketId: socket.id
+    });
   });
 
   // Leave meeting room
@@ -161,15 +166,24 @@ io.on('connection', (socket) => {
 
   // WebRTC signaling
   socket.on('webrtc_offer', (data) => {
-    socket.to(`meeting-${data.meetingId}`).emit('webrtc_offer', data);
+    socket.to(`meeting-${data.meetingId}`).emit('webrtc_offer', {
+      ...data,
+      socketId: socket.id
+    });
   });
 
   socket.on('webrtc_answer', (data) => {
-    socket.to(`meeting-${data.meetingId}`).emit('webrtc_answer', data);
+    socket.to(`meeting-${data.meetingId}`).emit('webrtc_answer', {
+      ...data,
+      socketId: socket.id
+    });
   });
 
   socket.on('webrtc_ice_candidate', (data) => {
-    socket.to(`meeting-${data.meetingId}`).emit('webrtc_ice_candidate', data);
+    socket.to(`meeting-${data.meetingId}`).emit('webrtc_ice_candidate', {
+      ...data,
+      socketId: socket.id
+    });
   });
 
   // Lecture Meeting Events
