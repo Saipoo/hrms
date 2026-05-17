@@ -528,7 +528,7 @@ const AdminConfessionPage = () => {
                     <option value="">Select Department</option>
                     {departments.map((dept) => (
                       <option key={dept.name} value={dept.name}>
-                        {dept.name} ({dept.teacherCount} teacher{dept.teacherCount !== 1 ? 's' : ''})
+                        {dept.name} ({dept.teacherCount} manager{dept.teacherCount !== 1 ? 's' : ''})
                       </option>
                     ))}
                   </select>
@@ -543,7 +543,7 @@ const AdminConfessionPage = () => {
                   </button>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Assigns confession to all teachers in the selected department
+                  Assigns confession to all managers in the selected department
                 </p>
               </div>
 

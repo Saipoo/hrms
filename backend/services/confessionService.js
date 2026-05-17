@@ -10,24 +10,27 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Encryption utilities
 // AES-256 requires a 32-byte key
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
 const IV_LENGTH = 16;
+
+// A stable, hardcoded backup key so server restarts never break decryption even if .env is missing
+const BACKUP_KEY = 'WorkSphereHRMSPrivateSecretKey32';
 
 /**
  * Get properly formatted encryption key (32 bytes)
  */
 function getEncryptionKey() {
+  const keyStr = process.env.ENCRYPTION_KEY || BACKUP_KEY;
   // If ENCRYPTION_KEY is 32 chars, pad it to 32 bytes
   // If it's longer, hash it to get exactly 32 bytes
-  if (ENCRYPTION_KEY.length === 32) {
+  if (keyStr.length === 32) {
     // Already 32 bytes if ASCII
-    return Buffer.from(ENCRYPTION_KEY, 'utf8');
-  } else if (ENCRYPTION_KEY.length === 64) {
+    return Buffer.from(keyStr, 'utf8');
+  } else if (keyStr.length === 64) {
     // It's a hex string representing 32 bytes
-    return Buffer.from(ENCRYPTION_KEY, 'hex');
+    return Buffer.from(keyStr, 'hex');
   } else {
     // Hash it to get exactly 32 bytes
-    return crypto.createHash('sha256').update(ENCRYPTION_KEY).digest();
+    return crypto.createHash('sha256').update(keyStr).digest();
   }
 }
 
