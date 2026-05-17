@@ -36,7 +36,7 @@ router.post('/employee-roadmap', protect, async (req, res) => {
     
     // Dynamically import AIService to avoid top-level dependency loops if any
     const AIServiceModule = await import('../services/AIService.js');
-    const aiService = new AIServiceModule.default();
+    const aiService = AIServiceModule.default;
     aiService.init();
 
     const prompt = `You are an expert HR Career Advisor. An employee has the current role: "${currentRole}". Their target future role is: "${targetRole}". Their current skills are: "${skills}". Generate a professional, step-by-step career upskilling roadmap for them to achieve this target role. Format it clearly using Markdown with headers, bullet points, and actionable advice. Return the markdown as a plain string.`;

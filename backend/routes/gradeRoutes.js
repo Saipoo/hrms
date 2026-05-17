@@ -77,7 +77,7 @@ router.post('/upload-answer', protect, authorize('student'), upload.single('answ
     // Create submission record
     const submission = await StudentSubmission.create({
       studentId: req.user._id,
-      studentUSN: student.usn,
+      studentUSN: student.empid || student.usn || student._id.toString(),
       studentName: student.name,
       subject: subject,
       answerScriptUrl: req.file.path,
@@ -319,7 +319,7 @@ router.get('/student/submissions', protect, authorize('student'), async (req, re
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
     
-    const submissions = await StudentSubmission.find({ studentUSN: student.usn })
+    const submissions = await StudentSubmission.find({ studentUSN: student.empid || student.usn })
       .sort({ uploadDate: -1 })
       .populate('teacherId', 'name email');
     
@@ -346,7 +346,7 @@ router.get('/student/results', protect, authorize('student'), async (req, res) =
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
     
-    const grades = await Grade.find({ studentUSN: student.usn, verified: true })
+    const grades = await Grade.find({ studentUSN: student.empid || student.usn, verified: true })
       .sort({ gradedDate: -1 })
       .populate('teacherId', 'name email');
     
@@ -373,9 +373,19 @@ router.get('/teacher/submissions', protect, authorize('teacher'), async (req, re
       return res.status(404).json({ success: false, message: 'Teacher not found' });
     }
     
-    // Get all students in teacher's department
-    const students = await Student.find({ department: teacher.department }).select('usn name');
-    const studentUSNs = students.map(s => s.usn);
+    // Get all students in teacher's department (flexible, case-insensitive matching)
+    const deptWords = teacher.department.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    let students = [];
+    if (deptWords.length > 0) {
+      const regexPatterns = deptWords.map(w => new RegExp(w, 'i'));
+      students = await Student.find({
+        $or: regexPatterns.map(pattern => ({ department: pattern }))
+      }).select('empid usn name');
+    } else {
+      students = await Student.find({ department: { $regex: new RegExp(teacher.department, 'i') } }).select('empid usn name');
+    }
+    
+    const studentUSNs = students.map(s => s.empid || s.usn);
     
     const submissions = await StudentSubmission.find({ studentUSN: { $in: studentUSNs } })
       .sort({ uploadDate: -1 });
