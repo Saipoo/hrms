@@ -11,7 +11,8 @@ import {
   X,
   Clock,
   BookOpen,
-  Users
+  Users,
+  Briefcase
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
@@ -250,7 +251,7 @@ const TimetableManagement = () => {
                   <Calendar className="w-6 h-6 text-primary-600" />
                   {day}
                   <span className="ml-auto text-sm font-normal text-gray-500">
-                    {daySchedule.length} {daySchedule.length === 1 ? 'class' : 'classes'}
+                    {daySchedule.length} {daySchedule.length === 1 ? 'shift' : 'shifts'}
                   </span>
                 </h2>
                 {daySchedule.length > 0 ? (
@@ -262,13 +263,13 @@ const TimetableManagement = () => {
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <BookOpen className="w-5 h-5 text-primary-600" />
+                            <Briefcase className="w-5 h-5 text-primary-600" />
                             <h3 className="font-semibold text-lg">{entry.subject}</h3>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                             <div className="flex items-center gap-1">
                               <Users className="w-4 h-4" />
-                              <span>{entry.class} - {entry.section}</span>
+                              <span>{entry.class} • {entry.section}</span>
                             </div>
                             <span>|</span>
                             <span>{entry.department}</span>
@@ -299,7 +300,7 @@ const TimetableManagement = () => {
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <Calendar className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>No classes scheduled for {day}</p>
+                    <p>No shifts scheduled for {day}</p>
                   </div>
                 )}
               </motion.div>
@@ -326,14 +327,14 @@ const TimetableManagement = () => {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Subject</label>
+                  <label className="block text-sm font-medium mb-2">Shift Type / Task</label>
                   <select
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     className="input-field"
                     required
                   >
-                    <option value="">Select Subject</option>
+                    <option value="">Select Shift / Task</option>
                     {user?.subjects?.map((subject) => (
                       <option key={subject} value={subject}>
                         {subject}
@@ -344,24 +345,24 @@ const TimetableManagement = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Class</label>
+                    <label className="block text-sm font-medium mb-2">Team / Designation</label>
                     <input
                       type="text"
                       value={formData.class}
                       onChange={(e) => setFormData({ ...formData, class: e.target.value })}
                       className="input-field"
-                      placeholder="e.g., 3rd Year"
+                      placeholder="e.g., Development Team, Senior Lead"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Section</label>
+                    <label className="block text-sm font-medium mb-2">Work Location / Zone</label>
                     <input
                       type="text"
                       value={formData.section}
                       onChange={(e) => setFormData({ ...formData, section: e.target.value })}
                       className="input-field"
-                      placeholder="e.g., A"
+                      placeholder="e.g., Floor 3, Remote/WFH"
                       required
                     />
                   </div>

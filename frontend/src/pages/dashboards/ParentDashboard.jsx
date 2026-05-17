@@ -19,7 +19,8 @@ import {
   Trophy,
   HelpCircle,
   Info,
-  Heart
+  Heart,
+  LogOut
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
@@ -28,7 +29,7 @@ import { initializeSocket, getSocket } from '../../services/socket';
 import toast from 'react-hot-toast';
 
 const HRDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [studentInfo, setStudentInfo] = useState(null);
   const [attendanceData, setAttendanceData] = useState([]);
@@ -126,7 +127,7 @@ const HRDashboard = () => {
       }
 
       // Fetch student's enrolled courses
-      if (user.linkedStudentUSN) {
+      if (user.linkedEmpId || user.linkedStudentUSN) {
         try {
           const coursesResponse = await api.get(`/courses/employee/${user.linkedEmpId}/enrollments`);
           console.log('📚 Student courses:', coursesResponse.data);
@@ -398,6 +399,13 @@ const HRDashboard = () => {
                 </div>
               )}
             </Link>
+            <button
+              onClick={logout}
+              className="btn btn-danger flex items-center gap-2 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white border-none"
+            >
+              <LogOut className="w-5 h-5" />
+              Logout
+            </button>
             <button onClick={exportToCSV} className="btn btn-secondary flex items-center gap-2">
               <Download className="w-5 h-5" />
               Export CSV
