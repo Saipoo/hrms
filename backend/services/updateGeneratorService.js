@@ -254,25 +254,11 @@ Return only valid JSON array.`;
    * Generate professional quote of the day
    */
   static async generateQuoteOfTheDay() {
-    try {
-      const prompt = `Generate a daily motivational quote for a professional employee. 
-Include a "quote", "author", and "title" (e.g., Leadership Insight, Success Mindset).
-Return only valid JSON object: { "quote": "", "author": "", "title": "" }`;
-
-      const quote = await AIService.generateContent(prompt, { jsonMode: true });
-      return quote || {
-        quote: "The only way to do great work is to love what you do.",
-        author: "Steve Jobs",
-        title: "Success Mindset"
-      };
-    } catch (error) {
-      console.error('Error generating quote:', error);
-      return {
-        quote: "Professionalism is not just what you do, it is how you do it.",
-        author: "Anonymous",
-        title: "Workplace Ethics"
-      };
-    }
+    return {
+      quote: "The only way to do great work is to love what you do.",
+      author: "Steve Jobs",
+      title: "Success Mindset"
+    };
   }
 }
 

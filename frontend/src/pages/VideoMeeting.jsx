@@ -28,7 +28,23 @@ const VideoMeeting = () => {
   const remoteVideoRef = useRef(null);
   const screenShareRef = useRef(null);
   const localStreamRef = useRef(null);
+  const remoteStreamRef = useRef(null);
   const peerConnectionRef = useRef(null);
+
+  // Callback refs to handle React mounting latency
+  const setLocalVideo = (el) => {
+    localVideoRef.current = el;
+    if (el && localStreamRef.current) {
+      el.srcObject = localStreamRef.current;
+    }
+  };
+
+  const setRemoteVideo = (el) => {
+    remoteVideoRef.current = el;
+    if (el && remoteStreamRef.current) {
+      el.srcObject = remoteStreamRef.current;
+    }
+  };
   const containerRef = useRef(null);
 
   // ICE servers configuration
@@ -102,6 +118,7 @@ const VideoMeeting = () => {
 
     // Handle incoming tracks
     peerConnectionRef.current.ontrack = (event) => {
+      remoteStreamRef.current = event.streams[0];
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
       }
@@ -359,7 +376,7 @@ const VideoMeeting = () => {
           className="relative bg-gray-800 rounded-xl overflow-hidden shadow-2xl"
         >
           <video
-            ref={localVideoRef}
+            ref={setLocalVideo}
             autoPlay
             muted
             playsInline
@@ -389,7 +406,7 @@ const VideoMeeting = () => {
           className="relative bg-gray-800 rounded-xl overflow-hidden shadow-2xl"
         >
           <video
-            ref={remoteVideoRef}
+            ref={setRemoteVideo}
             autoPlay
             playsInline
             className="w-full h-full object-cover"

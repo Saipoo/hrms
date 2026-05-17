@@ -41,6 +41,7 @@ export const EMPLOYEE_MENU = [
   { label: 'Innovation Challenges', path: '/dashboard/employee/challenges', icon: Trophy },
   { label: 'Duty Roster', path: '/dashboard/employee/planner', icon: Brain },
   { label: 'Manager Support', path: '/mentor-connect', icon: MessageSquare },
+  { label: 'Anonymous Feedback', path: '/dashboard/employee/my-feedback', icon: MessageSquare },
   { divider: true, label: 'Information' },
   { label: 'Company Policies', path: '/dashboard/employee/documents', icon: Video },
   { label: 'HR Announcements', path: '/dashboard/employee/updates', icon: Newspaper },

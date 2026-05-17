@@ -21,11 +21,11 @@ const ConfessionModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
 
   const categories = [
-    { name: 'Academic Issue', icon: '📚', description: 'Course difficulty, grades, understanding material' },
-    { name: 'Faculty Concern', icon: '👨‍🏫', description: 'Issues with teachers or teaching methods' },
-    { name: 'Peer Conflict', icon: '🤝', description: 'Problems with classmates or group work' },
-    { name: 'Personal/Emotional Concern', icon: '💭', description: 'Stress, anxiety, mental health' },
-    { name: 'College Infrastructure', icon: '🏫', description: 'Facilities, resources, campus issues' },
+    { name: 'Work/Job Issue', icon: '💼', description: 'Job difficulty, duties, understanding work material' },
+    { name: 'Manager/Lead Concern', icon: '👨‍💼', description: 'Issues with managers or leadership' },
+    { name: 'Colleague/Peer Conflict', icon: '🤝', description: 'Problems with coworkers or team collaboration' },
+    { name: 'Personal/Emotional Concern', icon: '💭', description: 'Stress, anxiety, work-life balance' },
+    { name: 'Office/Work Environment', icon: '🏢', description: 'Facilities, tools, workspace resources' },
     { name: 'Harassment/Disciplinary Issue', icon: '🚨', description: 'Serious concerns requiring immediate attention' },
     { name: 'Other', icon: '💬', description: 'Any other concerns' }
   ];
@@ -233,7 +233,7 @@ const ConfessionModal = ({ isOpen, onClose }) => {
                           <p className="text-sm text-gray-600">
                             {visibility === 'Anonymous' 
                               ? 'Your identity is hidden'
-                              : 'Teacher/Admin can see your name'}
+                              : 'Manager/Admin can see your name'}
                           </p>
                         </div>
                       </div>
@@ -258,21 +258,6 @@ const ConfessionModal = ({ isOpen, onClose }) => {
                         )}
                       </button>
                     </div>
-
-                    <label className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={shareWithParent}
-                        onChange={(e) => setShareWithParent(e.target.checked)}
-                        className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                      />
-                      <div>
-                        <h4 className="font-medium text-gray-800">Share with Parent</h4>
-                        <p className="text-sm text-gray-600">
-                          Allow your parent to see this concern
-                        </p>
-                      </div>
-                    </label>
                   </div>
 
                   {error && (

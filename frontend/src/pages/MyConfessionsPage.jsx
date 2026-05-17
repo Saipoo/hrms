@@ -7,6 +7,7 @@ import {
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import PageHeader from '../components/PageHeader';
+import ConfessionModal from '../components/ConfessionModal';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -15,6 +16,7 @@ const MyConfessionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedConfession, setSelectedConfession] = useState(null);
   const [filter, setFilter] = useState('all'); // all, pending, resolved
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     fetchMyConfessions();
@@ -114,13 +116,22 @@ const MyConfessionsPage = () => {
       <div className="max-w-7xl mx-auto p-6">
         {/* Header Actions */}
         <div className="flex items-center justify-between mb-8 mt-4">
-          <button
-            onClick={fetchMyConfessions}
-            className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
-          >
-            <RefreshCw size={18} />
-            <span>Refresh</span>
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={fetchMyConfessions}
+              className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+            >
+              <RefreshCw size={18} />
+              <span>Refresh</span>
+            </button>
+            <button
+              onClick={() => setModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow font-semibold transition-colors"
+            >
+              <MessageSquare size={18} />
+              <span>Submit Anonymous Feedback</span>
+            </button>
+          </div>
 
           {/* Filters */}
           <div className="flex gap-2">
@@ -171,6 +182,13 @@ const MyConfessionsPage = () => {
             <p className="text-gray-600 mb-6">
               You haven't submitted any feedback. Your space is always safe when you need it.
             </p>
+            <button
+              onClick={() => setModalOpen(true)}
+              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg transition-all font-semibold flex items-center gap-2 mx-auto"
+            >
+              <MessageSquare size={20} />
+              Submit Your First Feedback
+            </button>
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -372,6 +390,14 @@ const MyConfessionsPage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ConfessionModal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          fetchMyConfessions();
+        }}
+      />
     </div>
   );
 };

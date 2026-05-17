@@ -76,6 +76,15 @@ const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ MongoDB Connected Successfully');
+
+    // Drop legacy usn_1 index from students collection if it exists to allow multiple employee registrations without USN
+    try {
+      await mongoose.connection.db.collection('students').dropIndex('usn_1');
+      console.log('🗑️ Successfully dropped legacy usn_1 index from students collection');
+    } catch (indexError) {
+      // Index not found or already dropped, which is fine
+      console.log('ℹ️ usn_1 index not found or already dropped');
+    }
     
     // Auto-seed dummy courses on startup
     await seedDummyCourses();

@@ -15,8 +15,10 @@ import DashboardLayout from '../../components/DashboardLayout';
 import { EMPLOYEE_MENU } from '../../constants/menuItems';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
 
 const InterviewSimulator = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -51,7 +53,7 @@ const InterviewSimulator = () => {
       const userStr = localStorage.getItem('user');
       if (userStr) {
         const user = JSON.parse(userStr);
-        const response = await api.get(`/interview/results/${user.usn}`);
+        const response = await api.get(`/interview/results/${user.usn || user.empid || user.id || user._id || 'EMPLOYEE'}`);
         if (response.data.success) {
           // Show all interviews (not just 3)
           setRecentInterviews(response.data.data);

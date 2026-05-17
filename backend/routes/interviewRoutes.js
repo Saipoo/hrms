@@ -118,7 +118,7 @@ router.post('/start', protect, authorize('student'), async (req, res) => {
 
     // Create interview session
     const session = await InterviewSession.create({
-      studentUSN: req.user.usn,
+      studentUSN: req.user.usn || req.user.empid || req.user._id || 'EMPLOYEE',
       studentName: req.user.name,
       category,
       domain,
@@ -169,7 +169,7 @@ router.post('/:sessionId/submit-answer', protect, authorize('student'), async (r
       });
     }
 
-    if (session.studentUSN !== req.user.usn) {
+    if (session.studentUSN !== (req.user.usn || req.user.empid || req.user._id || 'EMPLOYEE')) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized access to this session'
@@ -225,7 +225,7 @@ router.post('/:sessionId/complete', protect, authorize('student'), async (req, r
       });
     }
 
-    if (session.studentUSN !== req.user.usn) {
+    if (session.studentUSN !== (req.user.usn || req.user.empid || req.user._id || 'EMPLOYEE')) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized access to this session'
@@ -313,7 +313,9 @@ router.get('/results/:studentUSN', protect, async (req, res) => {
     console.log('📝 User USN:', req.user.usn);
 
     // Authorization check
-    if (req.user.role === 'student' && req.user.usn !== studentUSN) {
+    const userUSN = (req.user.usn || req.user.empid || req.user._id || 'EMPLOYEE').toUpperCase();
+    const targetUSN = studentUSN.toUpperCase();
+    if (req.user.role === 'student' && userUSN !== targetUSN) {
       console.log('❌ Student unauthorized: USN mismatch');
       return res.status(403).json({
         success: false,
@@ -368,7 +370,7 @@ router.get('/report/:reportId', protect, async (req, res) => {
     }
 
     // Authorization check
-    if (req.user.role === 'student' && req.user.usn !== report.studentUSN) {
+    if (req.user.role === 'student' && (req.user.usn || req.user.empid || req.user._id || 'EMPLOYEE').toUpperCase() !== report.studentUSN) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized access'
