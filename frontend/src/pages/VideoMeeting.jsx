@@ -31,6 +31,8 @@ const VideoMeeting = () => {
   const localStreamRef = useRef(null);
   const remoteStreamRef = useRef(null);
   const peerConnectionRef = useRef(null);
+  const remoteSocketIdRef = useRef(null);
+  const iceCandidateQueue = useRef([]);
 
   // Callback refs to handle React mounting latency
   const setLocalVideo = (el) => {
@@ -59,7 +61,6 @@ const VideoMeeting = () => {
   useEffect(() => {
     fetchMeetingDetails();
     initializeMedia();
-    joinMeetingSocket();
 
     return () => {
       cleanup();
@@ -108,6 +109,9 @@ const VideoMeeting = () => {
 
       // Initialize WebRTC peer connection
       initializePeerConnection();
+
+      // Connect to socket room after peer connection and local media tracks are fully ready
+      joinMeetingSocket();
     } catch (error) {
       console.error('Error accessing media devices:', error);
       setError('Failed to access camera/microphone. Please check permissions.');
@@ -135,7 +139,7 @@ const VideoMeeting = () => {
     // Handle ICE candidates
     peerConnectionRef.current.onicecandidate = (event) => {
       if (event.candidate) {
-        mentorSocket.sendICECandidate(meetingId, event.candidate, null);
+        mentorSocket.sendICECandidate(meetingId, event.candidate, remoteSocketIdRef.current);
       }
     };
 
@@ -151,10 +155,17 @@ const VideoMeeting = () => {
     // Listen for WebRTC offers
     mentorSocket.on('webrtc_offer', async ({ offer, socketId }) => {
       try {
+        remoteSocketIdRef.current = socketId; // Store remote socket ID
         await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await peerConnectionRef.current.createAnswer();
         await peerConnectionRef.current.setLocalDescription(answer);
         mentorSocket.sendWebRTCAnswer(meetingId, answer, socketId);
+
+        // Flush queued candidates
+        for (const c of iceCandidateQueue.current) {
+          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(c));
+        }
+        iceCandidateQueue.current = [];
       } catch (error) {
         console.error('Error handling offer:', error);
       }
@@ -164,6 +175,12 @@ const VideoMeeting = () => {
     mentorSocket.on('webrtc_answer', async ({ answer }) => {
       try {
         await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+
+        // Flush queued candidates
+        for (const c of iceCandidateQueue.current) {
+          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(c));
+        }
+        iceCandidateQueue.current = [];
       } catch (error) {
         console.error('Error handling answer:', error);
       }
@@ -172,7 +189,11 @@ const VideoMeeting = () => {
     // Listen for ICE candidates
     mentorSocket.on('webrtc_ice_candidate', async ({ candidate }) => {
       try {
-        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+        if (peerConnectionRef.current?.remoteDescription) {
+          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+        } else {
+          iceCandidateQueue.current.push(candidate); // Queue it
+        }
       } catch (error) {
         console.error('Error handling ICE candidate:', error);
       }
@@ -180,11 +201,15 @@ const VideoMeeting = () => {
 
     // Listen for participant joined
     mentorSocket.on('participant_joined', async (data) => {
+      if (!data.socketId) return; // Ignore the HTTP-triggered event to avoid undefined offerer target
+
       setParticipants(prev => [...prev, data]);
       if (data.name) {
         setRemoteParticipantName(data.name);
       }
-      
+
+      remoteSocketIdRef.current = data.socketId; // Store remote socket ID
+
       // Create and send offer to new participant
       try {
         const offer = await peerConnectionRef.current.createOffer();
