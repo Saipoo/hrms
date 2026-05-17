@@ -166,24 +166,45 @@ io.on('connection', (socket) => {
 
   // WebRTC signaling
   socket.on('webrtc_offer', (data) => {
-    socket.to(`meeting-${data.meetingId}`).emit('webrtc_offer', {
-      ...data,
-      socketId: socket.id
-    });
+    if (data.targetSocketId) {
+      socket.to(data.targetSocketId).emit('webrtc_offer', {
+        ...data,
+        socketId: socket.id
+      });
+    } else {
+      socket.to(`meeting-${data.meetingId}`).emit('webrtc_offer', {
+        ...data,
+        socketId: socket.id
+      });
+    }
   });
 
   socket.on('webrtc_answer', (data) => {
-    socket.to(`meeting-${data.meetingId}`).emit('webrtc_answer', {
-      ...data,
-      socketId: socket.id
-    });
+    if (data.targetSocketId) {
+      socket.to(data.targetSocketId).emit('webrtc_answer', {
+        ...data,
+        socketId: socket.id
+      });
+    } else {
+      socket.to(`meeting-${data.meetingId}`).emit('webrtc_answer', {
+        ...data,
+        socketId: socket.id
+      });
+    }
   });
 
   socket.on('webrtc_ice_candidate', (data) => {
-    socket.to(`meeting-${data.meetingId}`).emit('webrtc_ice_candidate', {
-      ...data,
-      socketId: socket.id
-    });
+    if (data.targetSocketId) {
+      socket.to(data.targetSocketId).emit('webrtc_ice_candidate', {
+        ...data,
+        socketId: socket.id
+      });
+    } else {
+      socket.to(`meeting-${data.meetingId}`).emit('webrtc_ice_candidate', {
+        ...data,
+        socketId: socket.id
+      });
+    }
   });
 
   // Lecture Meeting Events
