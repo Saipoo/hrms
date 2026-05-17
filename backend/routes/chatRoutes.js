@@ -354,7 +354,7 @@ router.get('/contacts/list', protect, async (req, res) => {
       email: t.email,
       role: 'teacher',
       department: t.department,
-      studentUSN: 'STAFF',
+      studentUSN: t.employeeId || 'EMP-' + t._id.toString().substring(18).toUpperCase(),
       studentName: t.name
     }));
 

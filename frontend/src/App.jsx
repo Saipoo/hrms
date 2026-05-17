@@ -43,6 +43,8 @@ import Leaderboard from './pages/student/hackathon/Leaderboard';
 import StudyPlanner from './pages/student/StudyPlanner';
 import CareerAdvisor from './pages/student/CareerAdvisor';
 import ResumeBuilder from './pages/student/ResumeBuilder';
+import EmployeePlanner from './pages/employee/EmployeePlanner';
+import EmployeeCareerAdvisor from './pages/employee/EmployeeCareerAdvisor';
 import StudentLectures from './pages/student/StudentLectures';
 import RealTimeUpdates from './pages/student/RealTimeUpdates';
 import TeacherLectures from './pages/manager/TeacherLectures';
@@ -178,12 +180,12 @@ function App() {
         {/* Growth & Career Routes */}
         <Route path="/dashboard/employee/planner" element={
           <ProtectedRoute allowedRoles={['student']}>
-            <StudyPlanner />
+            <EmployeePlanner />
           </ProtectedRoute>
         } />
         <Route path="/dashboard/employee/career-advisor" element={
           <ProtectedRoute allowedRoles={['student']}>
-            <CareerAdvisor />
+            <EmployeeCareerAdvisor />
           </ProtectedRoute>
         } />
         <Route path="/dashboard/employee/profile-builder" element={

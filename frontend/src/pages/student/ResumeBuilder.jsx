@@ -25,9 +25,15 @@ import { EMPLOYEE_MENU } from '../../constants/menuItems';
 const ResumeBuilder = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [activeStep, setActiveStep] = useState('choose'); // choose, generate, edit, preview
+  const [activeStep, setActiveStep] = useState('details'); // details, choose, edit, preview
   const [selectedTemplate, setSelectedTemplate] = useState('modern');
   const [jobDescription, setJobDescription] = useState('');
+  const [userDetails, setUserDetails] = useState({
+    name: user?.name || '',
+    experience: '',
+    education: '',
+    skills: ''
+  });
   const [generatedResume, setGeneratedResume] = useState(null);
   const [savedResumes, setSavedResumes] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
@@ -69,7 +75,7 @@ const ResumeBuilder = () => {
 
       const response = await axios.post(
         `${API_URL}/api/career/resume/generate`,
-        { template: selectedTemplate, jobDescription },
+        { template: selectedTemplate, jobDescription, userDetails },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -223,12 +229,12 @@ const ResumeBuilder = () => {
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${activeStep === step
                       ? 'bg-indigo-600 text-white'
-                      : idx < ['choose', 'generate', 'edit', 'preview'].indexOf(activeStep)
+                      : idx < ['details', 'choose', 'edit', 'preview'].indexOf(activeStep)
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-200 text-gray-500'
                     }`}
                 >
-                  {idx < ['choose', 'generate', 'edit', 'preview'].indexOf(activeStep) ? (
+                  {idx < ['details', 'choose', 'edit', 'preview'].indexOf(activeStep) ? (
                     <CheckCircle className="w-5 h-5" />
                   ) : (
                     idx + 1
@@ -240,6 +246,82 @@ const ResumeBuilder = () => {
             ))}
           </div>
         </div>
+
+                {/* Step: User Details */}
+        {activeStep === 'details' && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Provide Your Details & Target Job</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg text-gray-800">Your Information</h3>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={userDetails.name}
+                    onChange={(e) => setUserDetails({...userDetails, name: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Enter your name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Experience (Years/Summary)</label>
+                  <textarea
+                    value={userDetails.experience}
+                    onChange={(e) => setUserDetails({...userDetails, experience: e.target.value})}
+                    rows="3"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Briefly describe your experience"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Education</label>
+                  <input
+                    type="text"
+                    value={userDetails.education}
+                    onChange={(e) => setUserDetails({...userDetails, education: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="e.g. B.Tech Computer Science"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Key Skills</label>
+                  <input
+                    type="text"
+                    value={userDetails.skills}
+                    onChange={(e) => setUserDetails({...userDetails, skills: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="e.g. React, Node.js, Project Management"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg text-gray-800">Target Job Description</h3>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Job Description (JD)</label>
+                  <textarea
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    rows="12"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 h-full min-h-[250px]"
+                    placeholder="Paste the job description here so the AI can tailor your resume to the requirements and ATS keywords..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={() => setActiveStep('choose')}
+                disabled={!userDetails.name || !userDetails.experience || !jobDescription}
+                className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold text-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                Next Step: Choose Template
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Step: Choose Template */}
         {activeStep === 'choose' && (

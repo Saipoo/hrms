@@ -74,14 +74,13 @@ class AIService {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            model: 'llama3-70b-8192',
+            model: 'llama-3.3-70b-versatile',
             messages: [
               { role: 'system', content: systemPrompt },
               { role: 'user', content: prompt }
             ],
             temperature,
-            max_tokens: maxTokens,
-            response_format: jsonMode ? { type: 'json_object' } : undefined
+            max_tokens: maxTokens
           })
         });
 

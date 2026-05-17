@@ -25,6 +25,34 @@ const upload = multer({
 
 const router = express.Router();
 
+// ==================== EMPLOYEE CAREER ROADMAP ====================
+
+// @desc    Generate Employee Career Roadmap
+// @route   POST /api/career/employee-roadmap
+// @access  Private (Employee)
+router.post('/employee-roadmap', protect, async (req, res) => {
+  try {
+    const { currentRole, targetRole, skills } = req.body;
+    
+    // Dynamically import AIService to avoid top-level dependency loops if any
+    const AIServiceModule = await import('../services/AIService.js');
+    const aiService = new AIServiceModule.default();
+    aiService.init();
+
+    const prompt = `You are an expert HR Career Advisor. An employee has the current role: "${currentRole}". Their target future role is: "${targetRole}". Their current skills are: "${skills}". Generate a professional, step-by-step career upskilling roadmap for them to achieve this target role. Format it clearly using Markdown with headers, bullet points, and actionable advice. Return the markdown as a plain string.`;
+
+    const result = await aiService.generateContent(prompt, { 
+      systemPrompt: "You are an HR Career Advisor.",
+      jsonMode: false 
+    });
+
+    res.status(200).json({ success: true, roadmap: result });
+  } catch (error) {
+    console.error('Error generating roadmap:', error);
+    res.status(500).json({ success: false, message: 'Failed to generate roadmap', error: error.message });
+  }
+});
+
 // ==================== CAREER PROFILE CRUD ====================
 
 // @desc    Create or get career profile
@@ -554,24 +582,28 @@ router.put('/skill-progress', protect, authorize('student'), async (req, res) =>
 // @access  Private (Student)
 router.post('/resume/generate', protect, authorize('student'), async (req, res) => {
   try {
-    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
+    const { template, jobDescription, userDetails } = req.body;
+    let careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
-      return res.status(404).json({
-        success: false,
-        message: 'Career profile not found'
+      careerProfile = await CareerProfile.create({
+        empid: req.user.empid,
+        studentName: req.user.name,
+        email: req.user.email
       });
     }
 
     // Sync integration data
     await careerProfile.syncIntegrationData();
 
-    // Prepare student profile for AI
+    // Prepare student profile for AI (Merge DB data with manual userDetails)
     const studentProfile = {
-      name: careerProfile.studentName,
+      name: userDetails?.name || careerProfile.studentName,
       email: careerProfile.email,
-      usn: careerProfile.usn,
-      skills: careerProfile.currentSkills,
+      experience: userDetails?.experience || '',
+      education: userDetails?.education || '',
+      skills: userDetails?.skills || careerProfile.currentSkills?.map(s => s.name).join(', '),
+      targetJobDescription: jobDescription || '',
       integrationData: careerProfile.integrationData,
       chosenPaths: careerProfile.chosenPaths
     };

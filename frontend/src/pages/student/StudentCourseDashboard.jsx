@@ -9,7 +9,8 @@ import {
   Clock,
   CheckCircle,
   BarChart3,
-  Target
+  Target,
+  Play
 } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import { EMPLOYEE_MENU } from '../../constants/menuItems';

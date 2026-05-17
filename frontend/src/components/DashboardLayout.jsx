@@ -61,9 +61,11 @@ const DashboardLayout = ({ children, menuItems, role, title }) => {
           <div className="flex flex-col items-center text-center py-2">
             {/* Avatar */}
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-3 shadow-lg ring-2 ring-white dark:ring-gray-700">
-              {user?.profileImage ? (
+              {(user?.profileImage || user?.profilePicture) ? (
                 <img
-                  src={user.profileImage}
+                  src={(user.profileImage || user.profilePicture).startsWith('http') 
+                        ? (user.profileImage || user.profilePicture) 
+                        : `http://localhost:5000${(user.profileImage || user.profilePicture).startsWith('/') ? '' : '/'}${user.profileImage || user.profilePicture}`}
                   alt={user?.name}
                   className="w-full h-full rounded-full object-cover"
                 />
@@ -96,9 +98,11 @@ const DashboardLayout = ({ children, menuItems, role, title }) => {
         ) : (
           <div className="flex justify-center py-2">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
-              {user?.profileImage ? (
+              {(user?.profileImage || user?.profilePicture) ? (
                 <img
-                  src={user.profileImage}
+                  src={(user.profileImage || user.profilePicture).startsWith('http') 
+                        ? (user.profileImage || user.profilePicture) 
+                        : `http://localhost:5000${(user.profileImage || user.profilePicture).startsWith('/') ? '' : '/'}${user.profileImage || user.profilePicture}`}
                   alt={user?.name}
                   className="w-full h-full rounded-full object-cover"
                 />
