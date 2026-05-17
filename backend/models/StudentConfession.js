@@ -48,11 +48,11 @@ const studentConfessionSchema = new mongoose.Schema({
   category: {
     type: String,
     enum: [
-      'Academic Issue',
-      'Faculty Concern',
-      'Peer Conflict',
+      'Work/Job Issue',
+      'Manager/Lead Concern',
+      'Colleague/Peer Conflict',
       'Personal/Emotional Concern',
-      'College Infrastructure',
+      'Office/Work Environment',
       'Harassment/Disciplinary Issue',
       'Other'
     ],
