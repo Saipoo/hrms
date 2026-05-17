@@ -23,6 +23,7 @@ const VideoMeeting = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [participants, setParticipants] = useState([]);
   const [error, setError] = useState(null);
+  const [remoteParticipantName, setRemoteParticipantName] = useState('');
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -71,6 +72,13 @@ const VideoMeeting = () => {
       const meetingData = response.data.data;
       setMeeting(meetingData);
       setIsLoading(false);
+
+      // Set initial remote name guess based on role
+      if (user.role === 'teacher') {
+        setRemoteParticipantName(meetingData.parentName || meetingData.studentName || 'Employee');
+      } else {
+        setRemoteParticipantName(meetingData.teacherName || 'Manager');
+      }
 
       // Auto-join the meeting
       await api.patch(`/mentor/connect/meeting/${meetingId}/join`);
@@ -173,6 +181,9 @@ const VideoMeeting = () => {
     // Listen for participant joined
     mentorSocket.on('participant_joined', async (data) => {
       setParticipants(prev => [...prev, data]);
+      if (data.name) {
+        setRemoteParticipantName(data.name);
+      }
       
       // Create and send offer to new participant
       try {
@@ -413,7 +424,7 @@ const VideoMeeting = () => {
           />
           <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg">
             <p className="text-white font-medium">
-              {user?.role === 'teacher' ? meeting?.parentName : meeting?.teacherName}
+              {remoteParticipantName || (user?.role === 'teacher' ? 'Employee' : 'Manager')}
             </p>
           </div>
         </motion.div>
