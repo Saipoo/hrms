@@ -579,7 +579,7 @@ async function getAnalytics(filters = {}) {
 }
 
 /**
- * Get emotional health summary for a student (for parents)
+ * Get emotional health summary for an employee (for HR)
  */
 async function getEmotionalHealthSummary(studentId) {
   try {
@@ -592,7 +592,7 @@ async function getEmotionalHealthSummary(studentId) {
     
     if (confessions.length === 0) {
       return {
-        summary: 'No recent concerns reported. Your child appears to be doing well.',
+        summary: 'No recent concerns reported. The employee appears to be doing well.',
         sentiment: 'Positive',
         confessionCount: 0,
         recommendations: []
@@ -608,9 +608,10 @@ async function getEmotionalHealthSummary(studentId) {
     else if (avgSentiment < 0.4) overallSentiment = 'Needs Attention';
     
     // Generate AI summary
+    const genAI = getGenAI();
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     
-    const prompt = `Based on ${confessions.length} recent concerns from a student, generate a brief emotional health summary for parents (2-3 sentences). The average sentiment score is ${avgSentiment.toFixed(2)} (0-1 scale). Categories of concerns: ${confessions.map(c => c.category).join(', ')}. Be supportive, honest, and provide general guidance without specific details.`;
+    const prompt = `Based on ${confessions.length} recent concerns from an employee, generate a brief emotional health summary for HR / corporate care team (2-3 sentences). The average sentiment score is ${avgSentiment.toFixed(2)} (0-1 scale). Categories of concerns: ${confessions.map(c => c.category).join(', ')}. Be supportive, honest, and provide general guidance without specific details.`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -621,9 +622,9 @@ async function getEmotionalHealthSummary(studentId) {
       sentiment: overallSentiment,
       confessionCount: confessions.length,
       recommendations: [
-        'Maintain open communication with your child',
-        'Check in regularly about their well-being',
-        'Consider scheduling a meeting with their counselor'
+        'Maintain open, supportive communication with the employee',
+        'Check in regularly about their well-being and workload',
+        'Consider scheduling a supportive meeting or offering mental health resources'
       ]
     };
   } catch (error) {
