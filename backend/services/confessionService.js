@@ -94,7 +94,7 @@ async function analyzeSentiment(content) {
     const genAI = getGenAI();
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     
-    const prompt = `Analyze the following student confession/complaint and provide:
+    const prompt = `Analyze the following employee concern/complaint and provide:
 1. Primary sentiment (choose one: Neutral, Sadness, Anger, Stress, Anxiety, Fear, Frustration, Hope, Gratitude)
 2. Sentiment score (0-1, where 0 is very negative and 1 is very positive)
 3. Severity level (Low, Medium, High, Critical)
@@ -102,7 +102,7 @@ async function analyzeSentiment(content) {
 5. Brief summary (1-2 sentences)
 6. Recommendation for handling (1-2 sentences)
 
-Student's message:
+Employee's message:
 """
 ${content}
 """
@@ -133,7 +133,7 @@ Respond in JSON format:
       sentimentScore: 0.5,
       severity: 'Medium',
       severityScore: 5,
-      summary: 'Student has raised a concern that requires attention.',
+      summary: 'Employee has raised a concern that requires attention.',
       recommendation: 'Review the concern and provide appropriate support.'
     };
   } catch (error) {
@@ -158,7 +158,7 @@ async function generateEmpatheticResponse(content, category) {
     const genAI = getGenAI();
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     
-    const prompt = `You are a compassionate counselor for students. A student has shared the following ${category.toLowerCase()}:
+    const prompt = `You are a compassionate HR specialist or corporate counselor for employees. An employee has shared the following concern:
 
 """
 ${content}

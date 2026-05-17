@@ -258,6 +258,30 @@ const ConfessionModal = ({ isOpen, onClose }) => {
                         )}
                       </button>
                     </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center space-x-3">
+                        <Heart className="text-purple-600" size={20} />
+                        <div>
+                          <h4 className="font-medium text-gray-800">Share with HR / Care Team</h4>
+                          <p className="text-sm text-gray-600">
+                            {shareWithParent 
+                              ? 'HR can view this concern for corporate support'
+                              : 'Keep this concern private from HR'}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShareWithParent(!shareWithParent)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          shareWithParent
+                            ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                            : 'bg-gray-100 text-gray-700 border border-gray-300'
+                        }`}
+                      >
+                        {shareWithParent ? 'Shared' : 'Private'}
+                      </button>
+                    </div>
                   </div>
 
                   {error && (

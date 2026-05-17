@@ -351,7 +351,7 @@ const MyConfessionsPage = () => {
                         <div key={idx} className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-semibold text-blue-900">
-                              {response.from}
+                              {response.from === 'Teacher' ? 'Manager' : response.from}
                             </span>
                             <span className="text-xs text-blue-600">
                               {new Date(response.timestamp).toLocaleString()}

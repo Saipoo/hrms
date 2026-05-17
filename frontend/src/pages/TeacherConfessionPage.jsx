@@ -246,7 +246,7 @@ const TeacherConfessionPage = () => {
                       <User size={16} className="text-green-500" />
                     )}
                     <span className="font-medium text-gray-800">
-                      {confession.studentName}
+                      {confession.studentName === 'Anonymous Student' ? 'Anonymous Employee' : confession.studentName}
                     </span>
                   </div>
 
@@ -281,7 +281,7 @@ const TeacherConfessionPage = () => {
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <h2 className="text-xl font-bold text-gray-800">
-                        {selectedConfession.studentName}
+                        {selectedConfession.studentName === 'Anonymous Student' ? 'Anonymous Employee' : selectedConfession.studentName}
                       </h2>
                       {selectedConfession.visibility === 'Anonymous' && (
                         <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center gap-1">
@@ -331,7 +331,7 @@ const TeacherConfessionPage = () => {
 
                 {/* Content */}
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                  <h3 className="font-semibold text-gray-800 mb-2">Student's Concern:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">Employee's Concern:</h3>
                   <p className="text-gray-700 whitespace-pre-wrap">{selectedConfession.content}</p>
                 </div>
 
@@ -344,7 +344,7 @@ const TeacherConfessionPage = () => {
                         <div key={idx} className="bg-blue-50 rounded-lg p-4">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-sm font-medium text-blue-900">
-                              {response.from}
+                              {response.from === 'Teacher' ? 'Manager' : response.from}
                             </span>
                             <span className="text-xs text-blue-600">
                               {new Date(response.timestamp).toLocaleString()}
@@ -394,7 +394,7 @@ const TeacherConfessionPage = () => {
                   {/* Reply */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Send Reply to Student
+                      Send Reply to Employee
                     </label>
                     <div className="flex gap-2">
                       <textarea

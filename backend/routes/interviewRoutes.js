@@ -310,6 +310,7 @@ router.get('/results/:studentUSN', protect, async (req, res) => {
     console.log('📊 Fetching interview results for:', studentUSN);
     console.log('👤 User role:', req.user.role);
     console.log('🔗 User linkedStudentUSN:', req.user.linkedStudentUSN);
+    console.log('🔗 User linkedEmpId:', req.user.linkedEmpId);
     console.log('📝 User USN:', req.user.usn);
 
     // Authorization check
@@ -323,13 +324,14 @@ router.get('/results/:studentUSN', protect, async (req, res) => {
       });
     }
 
-    if (req.user.role === 'parent' && req.user.linkedStudentUSN !== studentUSN) {
-      console.log('❌ Parent unauthorized: linkedStudentUSN mismatch');
+    const parentLinkedId = req.user.linkedEmpId || req.user.linkedStudentUSN;
+    if (req.user.role === 'parent' && parentLinkedId !== studentUSN) {
+      console.log('❌ Parent unauthorized: linkedStudentUSN/linkedEmpId mismatch');
       console.log('   Expected:', studentUSN);
-      console.log('   Got:', req.user.linkedStudentUSN);
+      console.log('   Got:', parentLinkedId);
       return res.status(403).json({
         success: false,
-        message: 'Unauthorized access to this student\'s data'
+        message: 'Unauthorized access to this employee\'s data'
       });
     }
 
@@ -377,7 +379,8 @@ router.get('/report/:reportId', protect, async (req, res) => {
       });
     }
 
-    if (req.user.role === 'parent' && req.user.linkedStudentUSN !== report.studentUSN) {
+    const parentLinkedId = req.user.linkedEmpId || req.user.linkedStudentUSN;
+    if (req.user.role === 'parent' && parentLinkedId !== report.studentUSN) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized access'
