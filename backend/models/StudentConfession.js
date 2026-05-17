@@ -266,8 +266,9 @@ studentConfessionSchema.statics.getByRole = async function(userId, userRole, fil
     const Parent = mongoose.model('Parent');
     const Student = mongoose.model('Student');
     const parentUser = await Parent.findById(userId);
-    if (parentUser && parentUser.linkedStudentUSN) {
-      const student = await Student.findOne({ usn: parentUser.linkedStudentUSN });
+    const linkedUSN = parentUser ? (parentUser.linkedEmpId || parentUser.linkedStudentUSN) : null;
+    if (parentUser && linkedUSN) {
+      const student = await Student.findOne({ $or: [{ usn: linkedUSN }, { empid: linkedUSN }] });
       if (student) {
         query.studentId = student._id;
         query.shareWithParent = true;

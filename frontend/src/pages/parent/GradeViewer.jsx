@@ -13,21 +13,13 @@ const GradeViewer = () => {
   const [studentUSN, setStudentUSN] = useState('');
 
   useEffect(() => {
-    // Get linked student USN from parent profile
-    const fetchParentProfile = async () => {
-      try {
-        const response = await api.get('/parents/profile');
-        if (response.data.linkedStudentUSN) {
-          setStudentUSN(response.data.linkedStudentUSN);
-          fetchResults(response.data.linkedStudentUSN);
-        }
-      } catch (error) {
-        console.error('Error fetching parent profile:', error);
-      }
-    };
-
-    fetchParentProfile();
-  }, []);
+    // Get linked student USN directly from the user context
+    const usn = user?.linkedStudentUSN || user?.linkedEmpId;
+    if (usn) {
+      setStudentUSN(usn);
+      fetchResults(usn);
+    }
+  }, [user]);
 
   const fetchResults = async (usn) => {
     setLoading(true);

@@ -367,14 +367,15 @@ router.get('/parent/emotional-health/:studentId', protect, async (req, res) => {
     const { default: Student } = await import('../models/Student.js');
     
     const parentUser = await Parent.findById(req.user._id);
-    if (!parentUser || !parentUser.linkedStudentUSN) {
+    const linkedUSN = parentUser ? (parentUser.linkedEmpId || parentUser.linkedStudentUSN) : null;
+    if (!parentUser || !linkedUSN) {
       return res.status(403).json({
         success: false,
         message: 'No linked student found for this parent'
       });
     }
     
-    const student = await Student.findOne({ usn: parentUser.linkedStudentUSN });
+    const student = await Student.findOne({ $or: [{ usn: linkedUSN }, { empid: linkedUSN }] });
     if (!student) {
       return res.status(404).json({
         success: false,

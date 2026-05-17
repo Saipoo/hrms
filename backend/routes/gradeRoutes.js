@@ -416,7 +416,8 @@ router.get('/parent/results/:usn', protect, authorize('parent'), async (req, res
       return res.status(404).json({ success: false, message: 'Parent not found' });
     }
     
-    if (parent.linkedStudentUSN !== usn.toUpperCase()) {
+    const linkedUSN = parent.linkedEmpId || parent.linkedStudentUSN;
+    if (!linkedUSN || linkedUSN.toUpperCase() !== usn.toUpperCase()) {
       return res.status(403).json({ success: false, message: 'You are not authorized to view this student\'s results' });
     }
     

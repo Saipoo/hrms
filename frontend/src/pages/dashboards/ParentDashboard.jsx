@@ -366,14 +366,14 @@ const HRDashboard = () => {
               About
             </Link>
             <Link
-              to="/dashboard/hr/grade-viewer"
+              to="/dashboard/hr/grades"
               className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
             >
               <TrendingUp className="w-5 h-5" />
               Performance Reports
             </Link>
             <Link
-              to="/dashboard/hr/student-wellbeing"
+              to="/dashboard/hr/wellbeing"
               className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
             >
               <Heart className="w-5 h-5" />
@@ -387,7 +387,7 @@ const HRDashboard = () => {
               Refresh
             </button>
             <Link
-              to="/dashboard/parent/profile"
+              to="/dashboard/hr/profile"
               className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-500 hover:border-primary-600 transition-all flex-shrink-0 bg-gray-100 dark:bg-gray-700"
             >
               {user?.profilePhoto ? (

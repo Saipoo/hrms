@@ -62,14 +62,14 @@ router.post('/send', protect, async (req, res) => {
     });
 
     // Validation
-    if (!receiverId || !receiverRole || !studentUSN) {
+    if (!receiverId || !receiverRole) {
       console.error('Validation failed for send message - missing fields', {
         body: req.body,
         senderId: req.user._id
       });
       return res.status(400).json({
         success: false,
-        message: 'Please provide receiver ID, role, and student USN'
+        message: 'Please provide receiver ID and role'
       });
     }
 
@@ -83,13 +83,14 @@ router.post('/send', protect, async (req, res) => {
       });
     }
 
-    // Verify student exists and is linked
-    const student = await Student.findOne({ usn: studentUSN.toUpperCase() });
-    if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: `Student with USN ${studentUSN} not found`
-      });
+    const targetUSN = (studentUSN || '').toUpperCase();
+
+    // Verify student exists and is linked (do not fail request if it is a manager/HR employee ID)
+    if (targetUSN) {
+      const student = await Student.findOne({ $or: [{ usn: targetUSN }, { empid: targetUSN }] });
+      if (!student) {
+        console.log(`⚠️ Note: Student/Employee with USN/EmpID ${targetUSN} not found in Student collection.`);
+      }
     }
 
     // Create message
@@ -98,7 +99,7 @@ router.post('/send', protect, async (req, res) => {
       senderRole: req.user.role,
       receiverId,
       receiverRole,
-      studentUSN: studentUSN.toUpperCase(),
+      studentUSN: targetUSN,
       messageType: messageType || 'text',
       content: content || '',
       delivered: false,
@@ -329,9 +330,9 @@ router.get('/contacts/list', protect, async (req, res) => {
 
     // Fetch all users from all collections (excluding the current user)
     const [students, teachers, parents] = await Promise.all([
-      Student.find({ _id: { $ne: req.user._id } }).select('_id name email usn department class section'),
-      Teacher.find({ _id: { $ne: req.user._id } }).select('_id name email department subjects'),
-      Parent.find({ _id: { $ne: req.user._id } }).select('_id name email linkedStudentUSN')
+      Student.find({ _id: { $ne: req.user._id } }).select('_id name email usn empid department class section'),
+      Teacher.find({ _id: { $ne: req.user._id } }).select('_id name email empid department subjects'),
+      Parent.find({ _id: { $ne: req.user._id } }).select('_id name email linkedEmpId linkedStudentUSN')
     ]);
 
     // Format Students
@@ -342,7 +343,7 @@ router.get('/contacts/list', protect, async (req, res) => {
       email: s.email,
       role: 'student',
       department: s.department,
-      studentUSN: s.usn,
+      studentUSN: s.empid || s.usn,
       studentName: s.name
     }));
 
@@ -354,7 +355,7 @@ router.get('/contacts/list', protect, async (req, res) => {
       email: t.email,
       role: 'teacher',
       department: t.department,
-      studentUSN: t.employeeId || 'EMP-' + t._id.toString().substring(18).toUpperCase(),
+      studentUSN: t.empid || 'EMP-' + t._id.toString().substring(18).toUpperCase(),
       studentName: t.name
     }));
 
@@ -365,7 +366,7 @@ router.get('/contacts/list', protect, async (req, res) => {
       name: p.name,
       email: p.email,
       role: 'parent',
-      studentUSN: p.linkedStudentUSN,
+      studentUSN: p.linkedEmpId || p.linkedStudentUSN,
       studentName: p.name
     }));
 

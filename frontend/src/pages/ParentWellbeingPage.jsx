@@ -6,8 +6,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PageHeader from '../components/PageHeader';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+import api from '../services/api';
 
 const ParentWellbeingPage = () => {
   const [loading, setLoading] = useState(true);
@@ -22,13 +21,9 @@ const ParentWellbeingPage = () => {
   const fetchWellbeingData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
 
       // Get confessions shared with parent
-      const confessionsResponse = await axios.get(
-        `${API_URL}/api/confessions`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const confessionsResponse = await api.get('/confessions');
 
       const confessions = confessionsResponse.data.data.confessions;
       setSharedConfessions(confessions);
@@ -38,10 +33,7 @@ const ParentWellbeingPage = () => {
         const studentId = confessions[0].studentId._id || confessions[0].studentId;
         setStudentId(studentId);
         
-        const healthResponse = await axios.get(
-          `${API_URL}/api/confessions/parent/emotional-health/${studentId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const healthResponse = await api.get(`/confessions/parent/emotional-health/${studentId}`);
 
         setEmotionalHealth(healthResponse.data.data);
       }
