@@ -3,51 +3,55 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /**
- * ConnectBook AI Chatbot Service
- * Provides context-aware responses about ConnectBook features
+ * WorkSphere HRMS AI Chatbot Service
+ * Provides context-aware responses about WorkSphere HRMS features
  */
 class ChatbotService {
   
   /**
-   * Get ConnectBook feature context based on user role
+   * Get WorkSphere feature context based on user role
    */
   static getFeatureContext(role) {
     const baseFeatures = {
       common: `
-ConnectBook Platform Features:
-- **Dashboard**: Overview of all activities and quick stats
-- **Real-Time Updates**: AI-curated news about education, tech, jobs, and motivation
+WorkSphere HRMS Platform Features:
+- **Dashboard**: Overview of all activities and quick workforce stats
+- **Company Updates & News**: AI-curated news about HR, business, jobs, and motivation
 - **Profile Management**: Update personal information and settings
 - **PoornaGPT**: External AI tools platform (https://poornagpt.vercel.app)
 `,
       student: `
-Student-Specific Features:
-- **Attendance Tracker**: View your attendance records and statistics
-- **GradeMaster**: Check your grades, marks, and performance analytics
-- **CourseMaster**: Browse and enroll in available courses
-- **Study Planner**: AI-powered study schedule and task management
-- **Career Advisor**: Get personalized career guidance and recommendations
-- **Lecture Notes**: AI-generated short notes from recorded lectures
-- **Interview Simulator**: Practice interviews with AI feedback
-- **Internship Simulator**: Prepare for internships with simulated scenarios
-- **MentorConnect**: Connect with mentors and schedule meetings
+Employee-Specific Features:
+- **My Attendance Records**: View your attendance records, check-ins, check-outs, and statistics
+- **Mark Attendance**: Geolocation-based clock-in/clock-out system
+- **Performance Reviews**: Check your performance scores, ratings, and analytics
+- **Training Programs**: Browse and enroll in company training programs
+- **Work Planner**: AI-powered work schedule and task management
+- **HR Growth Advisor**: Get personalized career growth and HR guidance
+- **Company Documents & Policies**: Access company policy documents and training materials
+- **Interview Prep Simulator**: Practice HR interviews with AI feedback
+- **Employee Onboarding Simulator**: Onboarding scenarios and learning paths
+- **Manager Connect**: Connect with your manager and schedule 1-on-1 meetings
+- **Innovation Challenges**: Participate in company hackathons and innovation programs
 `,
       teacher: `
-Teacher-Specific Features:
-- **GradeMaster**: Upload answer keys, grade submissions, view analytics
-- **CourseMaster**: Create and manage courses, upload materials
-- **Attendance Management**: Mark and track student attendance
-- **Lecture Recording**: Record live lectures with AI transcription
-- **Meeting Scheduler**: Schedule sessions with students
-- **Student Analytics**: View detailed performance reports
+Manager-Specific Features:
+- **Performance Evaluator**: Upload KPIs, evaluate team performance, view analytics
+- **Training Program Creator**: Create and manage employee training programs
+- **Employee Attendance Logs**: View and manage team attendance records
+- **Shift Schedule Management**: Manage shift rosters and work schedules
+- **Company Documents**: Upload and manage company policy documents
+- **Training Reports**: View employee training completion and progress
+- **Innovation Reports**: Monitor innovation challenge participation
+- **Meeting Scheduler**: Schedule 1-on-1 and team meetings
 `,
       parent: `
-Parent-Specific Features:
-- **Student Dashboard**: Monitor your child's overall performance
-- **Attendance Tracking**: View attendance records and patterns
-- **Grade Reports**: Access detailed grade reports and analytics
-- **Performance Insights**: AI-generated insights about student progress
-- **Meeting Requests**: Schedule meetings with teachers or administrators
+HR Manager-Specific Features:
+- **HR Dashboard**: Monitor overall workforce performance
+- **Employee Attendance Tracking**: View attendance records and patterns
+- **Performance Reports**: Access detailed performance reviews and analytics
+- **Workforce Insights**: AI-generated insights about workforce progress
+- **Meeting Requests**: Schedule meetings with managers or administrators
 `
     };
 
@@ -55,39 +59,63 @@ Parent-Specific Features:
   }
 
   /**
-   * Get navigation routes for features
+   * Get navigation routes for features — mapped to actual App.jsx routes
    */
   static getNavigationMap() {
     return {
+      // Employee (student) routes
       'dashboard': '/dashboard/student',
+      'employee dashboard': '/dashboard/student',
       'attendance': '/dashboard/student/attendance-history',
-      'grademaster': '/dashboard/student/grade-master',
-      'coursemaster': '/dashboard/student/course-master',
-      'study planner': '/dashboard/student/study-planner',
+      'my attendance': '/dashboard/student/attendance-history',
+      'mark attendance': '/dashboard/student/mark-attendance',
+      'check in': '/dashboard/student/mark-attendance',
+      'check-in': '/dashboard/student/mark-attendance',
+      'performance reviews': '/dashboard/student/grade-master',
+      'performance review': '/dashboard/student/grade-master',
+      'training programs': '/dashboard/student/course-master',
+      'training program': '/dashboard/student/course-master',
+      'work planner': '/dashboard/student/study-planner',
+      'hr growth advisor': '/dashboard/student/career-advisor',
       'career advisor': '/dashboard/student/career-advisor',
-      'lecture notes': '/dashboard/student/lectures',
+      'company documents': '/dashboard/student/lectures',
+      'policies': '/dashboard/student/lectures',
+      'interview prep': '/dashboard/student/interview',
       'interview simulator': '/dashboard/student/interview',
-      'internship simulator': '/dashboard/student/internship',
-      'mentorconnect': '/dashboard/student/mentor-connect',
+      'onboarding simulator': '/dashboard/student/internship',
+      'internship': '/dashboard/student/internship',
+      'manager connect': '/mentor-connect',
+      'mentorconnect': '/mentor-connect',
+      'company updates': '/dashboard/student/updates',
       'real-time updates': '/dashboard/student/updates',
-      'profile': '/dashboard/student/profile',
+      'innovation challenges': '/dashboard/student/hackathon',
+      'hackathon': '/dashboard/student/hackathon',
+      'certificates': '/dashboard/student/certificates',
       'faq': '/dashboard/student/faq',
       'faqs': '/dashboard/student/faq',
       'help': '/dashboard/student/faq',
       'about': '/dashboard/student/about',
       'about us': '/dashboard/student/about',
-      'team': '/dashboard/student/about',
-      'contact': '/dashboard/student/about',
-      // Teacher routes
-      'teacher dashboard': '/dashboard/teacher',
-      'grade management': '/dashboard/teacher/grading',
-      'course management': '/dashboard/teacher/courses',
-      'teacher faq': '/dashboard/teacher/faq',
-      'teacher about': '/dashboard/teacher/about',
-      // Parent routes
-      'parent dashboard': '/dashboard/parent',
-      'parent faq': '/dashboard/parent/faq',
-      'parent about': '/dashboard/parent/about'
+      'about worksphere': '/dashboard/student/about',
+      // Manager (teacher) routes
+      'manager dashboard': '/dashboard/teacher',
+      'attendance logs': '/dashboard/teacher/attendance-logs',
+      'employee attendance': '/dashboard/teacher/attendance-logs',
+      'shift schedule': '/dashboard/teacher/timetable',
+      'timetable': '/dashboard/teacher/timetable',
+      'performance evaluator': '/dashboard/teacher/grade-evaluator',
+      'training creator': '/dashboard/teacher/course-creator',
+      'training dashboard': '/dashboard/teacher/course-dashboard',
+      'training reports': '/dashboard/teacher/internship-reports',
+      'innovation reports': '/dashboard/teacher/hackathon-reports',
+      'manager faq': '/dashboard/teacher/faq',
+      'manager about': '/dashboard/teacher/about',
+      // HR (parent) routes
+      'hr dashboard': '/dashboard/parent',
+      'hr faq': '/dashboard/parent/faq',
+      'hr about': '/dashboard/parent/about',
+      'grade viewer': '/dashboard/parent/grade-viewer',
+      'performance viewer': '/dashboard/parent/grade-viewer'
     };
   }
 
@@ -111,44 +139,52 @@ Parent-Specific Features:
   }
 
   /**
-   * Generate menu options based on role
+   * Generate menu options based on role — all routes verified against App.jsx
    */
   static getMenuOptions(role) {
     const menus = {
       student: [
-        { icon: '🏠', label: 'Dashboard Overview', route: '/dashboard/student' },
-        { icon: '📊', label: 'Attendance Tracker', route: '/dashboard/student/attendance-history' },
-        { icon: '🎓', label: 'GradeMaster', route: '/dashboard/student/grade-master' },
-        { icon: '📚', label: 'CourseMaster', route: '/dashboard/student/course-master' },
-        { icon: '📝', label: 'Study Planner', route: '/dashboard/student/study-planner' },
-        { icon: '🎯', label: 'Career Advisor', route: '/dashboard/student/career-advisor' },
-        { icon: '📖', label: 'Lecture Notes', route: '/dashboard/student/lectures' },
-        { icon: '💼', label: 'Interview Simulator', route: '/dashboard/student/interview' },
-        { icon: '🚀', label: 'Internship Simulator', route: '/dashboard/student/internship' },
-        { icon: '👨‍🏫', label: 'MentorConnect', route: '/dashboard/student/mentor-connect' },
-        { icon: '📰', label: 'Real-Time Updates', route: '/dashboard/student/updates' },
+        { icon: '🏠', label: 'Employee Dashboard', route: '/dashboard/student' },
+        { icon: '📍', label: 'Mark Attendance (Check-In/Out)', route: '/dashboard/student/mark-attendance' },
+        { icon: '📊', label: 'My Attendance Records', route: '/dashboard/student/attendance-history' },
+        { icon: '⭐', label: 'Performance Reviews', route: '/dashboard/student/grade-master' },
+        { icon: '📚', label: 'Training Programs', route: '/dashboard/student/course-master' },
+        { icon: '📝', label: 'Work Planner', route: '/dashboard/student/study-planner' },
+        { icon: '🎯', label: 'HR Growth Advisor', route: '/dashboard/student/career-advisor' },
+        { icon: '📄', label: 'Company Documents & Policies', route: '/dashboard/student/lectures' },
+        { icon: '💼', label: 'Interview Prep Simulator', route: '/dashboard/student/interview' },
+        { icon: '🚀', label: 'Employee Onboarding Simulator', route: '/dashboard/student/internship' },
+        { icon: '👔', label: 'Manager Connect', route: '/mentor-connect' },
+        { icon: '📰', label: 'Company Updates & News', route: '/dashboard/student/updates' },
+        { icon: '🏆', label: 'Innovation Challenges', route: '/dashboard/student/hackathon' },
+        { icon: '🎖️', label: 'Certificates & Achievements', route: '/dashboard/student/certificates' },
         { icon: '❓', label: 'FAQs & Help', route: '/dashboard/student/faq' },
-        { icon: 'ℹ️', label: 'About ConnectBook', route: '/dashboard/student/about' },
+        { icon: 'ℹ️', label: 'About WorkSphere HRMS', route: '/dashboard/student/about' },
         { icon: '🪄', label: 'Explore PoornaGPT', route: 'https://poornagpt.vercel.app', external: true }
       ],
       teacher: [
-        { icon: '🏠', label: 'Dashboard Overview', route: '/dashboard/teacher' },
-        { icon: '🎓', label: 'Grade Management', route: '/dashboard/teacher/grading' },
-        { icon: '📚', label: 'Course Management', route: '/dashboard/teacher/courses' },
-        { icon: '📊', label: 'Attendance Management', route: '/dashboard/teacher/attendance' },
-        { icon: '🎥', label: 'Lecture Recording', route: '/dashboard/teacher/lectures' },
-        { icon: '📰', label: 'Real-Time Updates', route: '/dashboard/teacher/updates' },
+        { icon: '🏠', label: 'Manager Dashboard', route: '/dashboard/teacher' },
+        { icon: '📊', label: 'Employee Attendance Logs', route: '/dashboard/teacher/attendance-logs' },
+        { icon: '📅', label: 'Shift Schedule Management', route: '/dashboard/teacher/timetable' },
+        { icon: '⭐', label: 'Performance Evaluator', route: '/dashboard/teacher/grade-evaluator' },
+        { icon: '📚', label: 'Training Program Creator', route: '/dashboard/teacher/course-creator' },
+        { icon: '📈', label: 'Training Dashboard', route: '/dashboard/teacher/course-dashboard' },
+        { icon: '💼', label: 'Interview Evaluations', route: '/dashboard/teacher/interview-evaluations' },
+        { icon: '🚀', label: 'Training Reports', route: '/dashboard/teacher/internship-reports' },
+        { icon: '🏆', label: 'Innovation Reports', route: '/dashboard/teacher/hackathon-reports' },
+        { icon: '🎥', label: 'Company Documents', route: '/dashboard/teacher/lectures' },
+        { icon: '👔', label: 'Manager Connect', route: '/mentor-connect' },
         { icon: '❓', label: 'FAQs & Help', route: '/dashboard/teacher/faq' },
-        { icon: 'ℹ️', label: 'About ConnectBook', route: '/dashboard/teacher/about' },
+        { icon: 'ℹ️', label: 'About WorkSphere HRMS', route: '/dashboard/teacher/about' },
         { icon: '🪄', label: 'Explore PoornaGPT', route: 'https://poornagpt.vercel.app', external: true }
       ],
       parent: [
-        { icon: '🏠', label: 'Dashboard Overview', route: '/dashboard/parent' },
-        { icon: '📊', label: 'Attendance Reports', route: '/dashboard/parent/attendance' },
-        { icon: '🎓', label: 'Grade Reports', route: '/dashboard/parent/grades' },
-        { icon: '📈', label: 'Performance Insights', route: '/dashboard/parent/insights' },
+        { icon: '🏠', label: 'HR Dashboard', route: '/dashboard/parent' },
+        { icon: '📊', label: 'Employee Performance', route: '/dashboard/parent/grade-viewer' },
+        { icon: '🎖️', label: 'Employee Certificates', route: '/dashboard/parent/certificates' },
+        { icon: '💬', label: 'Employee Wellbeing', route: '/dashboard/parent/student-wellbeing' },
         { icon: '❓', label: 'FAQs & Help', route: '/dashboard/parent/faq' },
-        { icon: 'ℹ️', label: 'About ConnectBook', route: '/dashboard/parent/about' },
+        { icon: 'ℹ️', label: 'About WorkSphere HRMS', route: '/dashboard/parent/about' },
         { icon: '🪄', label: 'Explore PoornaGPT', route: 'https://poornagpt.vercel.app', external: true }
       ]
     };
@@ -169,7 +205,7 @@ Parent-Specific Features:
       // Check for menu request
       if (query.toLowerCase().includes('menu') || query.toLowerCase().includes('options')) {
         return {
-          response: `Here are the available features you can explore:\n\n${this.getMenuOptions(role).map(m => `${m.icon} **${m.label}**`).join('\n')}\n\nJust tell me which one you'd like to explore, or ask me anything!`,
+          response: `Here are the available features in WorkSphere HRMS:\n\n${this.getMenuOptions(role).map(m => `${m.icon} **${m.label}**`).join('\n')}\n\nJust tell me which one you'd like to explore, or ask me anything!`,
           actionType: 'menu',
           menuOptions: this.getMenuOptions(role)
         };
@@ -178,7 +214,7 @@ Parent-Specific Features:
       // Check for PoornaGPT request
       if (query.toLowerCase().includes('poornagpt') || query.toLowerCase().includes('ai tools')) {
         return {
-          response: `🪄 **PoornaGPT** is an all-in-one AI tools platform that offers:\n\n✨ Multiple AI assistants for different tasks\n🎨 Creative tools and generators\n📝 Writing and content assistance\n🧠 Problem-solving utilities\n\nIt's a separate platform designed to complement ConnectBook with additional AI capabilities. Would you like to explore it?`,
+          response: `🪄 **PoornaGPT** is an all-in-one AI tools platform that offers:\n\n✨ Multiple AI assistants for different tasks\n🎨 Creative tools and generators\n📝 Writing and content assistance\n🧠 Problem-solving utilities\n\nIt's a separate platform designed to complement WorkSphere HRMS with additional AI capabilities. Would you like to explore it?`,
           actionType: 'poornagpt',
           externalLink: 'https://poornagpt.vercel.app'
         };
@@ -194,9 +230,10 @@ Parent-Specific Features:
         const roleMap = { student: 'student', teacher: 'teacher', parent: 'parent' };
         const faqRoute = `/dashboard/${roleMap[role] || 'student'}/faq`;
         return {
-          response: `❓ I can help you with that! Our **FAQ section** has comprehensive answers to common questions about:\n\n• Account and login issues\n• Using platform features\n• Grading and courses\n• Technical support\n• And much more!\n\nWould you like to browse the FAQs or ask me a specific question here?`,
+          response: `❓ I can help you with that! Our **FAQ section** has comprehensive answers to common questions about:\n\n• Account and login issues\n• Using platform features\n• Attendance and performance\n• Technical support\n• And much more!\n\nWould you like to browse the FAQs or ask me a specific question here?`,
           actionType: 'navigation',
-          navigationTarget: faqRoute
+          navigationTarget: faqRoute,
+          featureName: 'FAQs & Help'
         };
       }
 
@@ -211,17 +248,19 @@ Parent-Specific Features:
         const roleMap = { student: 'student', teacher: 'teacher', parent: 'parent' };
         const aboutRoute = `/dashboard/${roleMap[role] || 'student'}/about`;
         return {
-          response: `ℹ️ **About ConnectBook**\n\nConnectBook is built by the **IDEA_CRAP** team:\n• A POORNA SESHASEYAN - Senior Software Developer\n• Rakshith Subramanya Ravi - Team Lead\n• Chinmaya S Shetty - Senior Data and Product Analyst\n• Ajay S Patil - Senior Software Tester\n\nOur platform integrates AI-based education, communication, assessment, and simulation tools to revolutionize learning.\n\nWant to learn more about our team, technologies, or provide feedback?`,
+          response: `ℹ️ **About WorkSphere HRMS**\n\nWorkSphere HRMS is built by the **IDEA_CRAP** team:\n• A POORNA SESHASEYAN - Senior Software Developer\n• Rakshith Subramanya Ravi - Team Lead\n• Chinmaya S Shetty - Senior Data and Product Analyst\n• Ajay S Patil - Senior Software Tester\n\nOur platform integrates AI-based workforce management, communication, assessment, and analytics to revolutionize HR operations.\n\nWant to learn more about our team, technologies, or provide feedback?`,
           actionType: 'navigation',
-          navigationTarget: aboutRoute
+          navigationTarget: aboutRoute,
+          featureName: 'About WorkSphere'
         };
       }
 
       // Build context-aware prompt
       const featureContext = this.getFeatureContext(role);
-      const prompt = `You are the ConnectBook AI Assistant, a friendly and helpful chatbot for the ConnectBook educational platform.
+      const roleDisplayMap = { student: 'Employee', teacher: 'Manager', parent: 'HR Manager', admin: 'System Administrator' };
+      const prompt = `You are the WorkSphere HRMS AI Assistant, a friendly and helpful chatbot for the WorkSphere HR Management System.
 
-User Role: ${role.charAt(0).toUpperCase() + role.slice(1)}
+User Role: ${roleDisplayMap[role] || role.charAt(0).toUpperCase() + role.slice(1)}
 User Query: "${query}"
 
 Platform Context:
@@ -234,6 +273,7 @@ Instructions:
 4. If navigation is implied, mention you can take them there
 5. Keep responses concise and actionable
 6. Use markdown formatting for clarity
+7. Always refer to users as "Employee", "Manager", or "HR Manager" based on their role — never "Student", "Teacher", or "Parent"
 
 Response:`;
 
@@ -252,7 +292,7 @@ Response:`;
       
       // Fallback response if Gemini fails
       return {
-        response: `I'm here to help! 🤖 You can ask me about:\n\n📚 **Features**: What does GradeMaster do?\n🧭 **Navigation**: Take me to Study Planner\n📋 **Menu**: Show me all options\n\nWhat would you like to know?`,
+        response: `I'm here to help! 🤖 You can ask me about:\n\n📊 **Features**: What does Performance Reviews do?\n🧭 **Navigation**: Take me to Work Planner\n📋 **Menu**: Show me all options\n\nWhat would you like to know?`,
         actionType: 'fallback',
         error: error.message
       };
@@ -273,9 +313,9 @@ Response:`;
     const name = userName ? `, ${userName}` : '';
     
     const roleMessages = {
-      student: `${timeGreeting}${name}! 👋 I'm your ConnectBook Assistant.\n\nI can help you with:\n• 📊 Checking attendance & grades\n• 📚 Finding courses\n• 🎯 Planning your studies\n• 💼 Interview & internship prep\n• And much more!\n\nWhat would you like to explore today?`,
-      teacher: `${timeGreeting}${name}! 👋 I'm your ConnectBook Assistant.\n\nI can help you with:\n• 🎓 Managing grades & courses\n• 📊 Tracking student progress\n• 🎥 Recording lectures\n• And much more!\n\nHow can I assist you today?`,
-      parent: `${timeGreeting}${name}! 👋 I'm your ConnectBook Assistant.\n\nI can help you:\n• 📈 Monitor your child's progress\n• 📊 View attendance & grades\n• 💬 Understand platform features\n• And much more!\n\nWhat would you like to know?`
+      student: `${timeGreeting}${name}! 👋 I'm your WorkSphere HR Assistant.\n\nI can help you with:\n• 📍 Marking attendance & checking records\n• ⭐ Viewing performance reviews\n• 📚 Finding training programs\n• 🎯 Career growth guidance\n• 💼 Interview & onboarding prep\n• And much more!\n\nWhat would you like to explore today?`,
+      teacher: `${timeGreeting}${name}! 👋 I'm your WorkSphere HR Assistant.\n\nI can help you with:\n• ⭐ Managing performance & training\n• 📊 Tracking employee attendance\n• 📚 Creating training programs\n• 📅 Managing shift schedules\n• And much more!\n\nHow can I assist you today?`,
+      parent: `${timeGreeting}${name}! 👋 I'm your WorkSphere HR Assistant.\n\nI can help you:\n• 📈 Monitor workforce performance\n• 📊 View attendance & reviews\n• 💬 Understand platform features\n• And much more!\n\nWhat would you like to know?`
     };
 
     return roleMessages[role] || roleMessages.student;

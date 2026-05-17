@@ -18,6 +18,7 @@ import {
   VideoIcon
 } from 'lucide-react';
 import TeacherMeetingRoom from '../../components/meetings/TeacherMeetingRoom';
+import PageHeader from '../../components/PageHeader';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -285,29 +286,22 @@ const TeacherLectures = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <Video className="w-8 h-8 text-indigo-600" />
-                Lecture Short Notes
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Record, transcribe, and generate AI-powered lecture notes
-              </p>
-            </div>
-            
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader 
+        title="Manager Documents & Policies" 
+        subtitle="Record, transcribe, and manage AI-powered training videos" 
+        icon={Video} 
+      />
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header Actions */}
+        <div className="flex items-center justify-end mb-6 mt-4">
             <button
               onClick={() => setShowCreateModal(true)}
               className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2"
             >
               <Video className="w-5 h-5" />
-              New Lecture
+              New Training Session
             </button>
-          </div>
         </div>
 
         {/* Statistics */}

@@ -11,6 +11,8 @@ import {
   ChevronRight,
   Sparkles
 } from 'lucide-react';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -157,23 +159,15 @@ const InterviewSimulator = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Role Transition Prep"
+    >
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl">
-              <Briefcase className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-                Interview Simulator
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Practice mock interviews with AI-powered evaluation
-              </p>
-            </div>
-          </div>
 
           {/* Stats Banner */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -394,6 +388,7 @@ const InterviewSimulator = () => {
         </AnimatePresence>
       </div>
     </div>
+    </DashboardLayout>
   );
 };
 

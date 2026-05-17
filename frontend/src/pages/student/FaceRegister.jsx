@@ -13,6 +13,9 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import PageHeader from '../../components/PageHeader';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
 
 const FaceRegister = () => {
   const { user } = useAuth();
@@ -56,7 +59,7 @@ const FaceRegister = () => {
 
   const checkRegistration = async () => {
     try {
-      const response = await api.get(`/face/check/${user.usn}`);
+    const response = await api.get(`/face/check/${user.empid}`);
       if (response.data.registered) {
         setIsRegistered(true);
         toast.info('Face already registered!');
@@ -156,10 +159,10 @@ const FaceRegister = () => {
     setLoading(true);
     try {
       const response = await api.post('/face/register', {
-        usn: user.usn,
+        empid: user.empid,
         name: user.name,
         department: user.department,
-        class: user.class,
+        designation: user.designation,
         embeddings: capturedEmbeddings
       });
 
@@ -167,7 +170,7 @@ const FaceRegister = () => {
         toast.success('Face registered successfully! 🎉');
         stopCamera();
         setTimeout(() => {
-          navigate('/dashboard/student');
+          navigate('/dashboard/employee');
         }, 2000);
       }
     } catch (error) {
@@ -188,26 +191,13 @@ const FaceRegister = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate('/dashboard/student')}
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Dashboard
-          </button>
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-            <ScanFace className="w-8 h-8 text-primary-600" />
-            Face Registration
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Register your face for automated attendance marking
-          </p>
-        </div>
-
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Face Registration"
+    >
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-4xl mx-auto py-12 px-4">
         {isRegistered && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -390,7 +380,8 @@ const FaceRegister = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

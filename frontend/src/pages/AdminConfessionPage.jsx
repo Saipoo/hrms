@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import PageHeader from '../components/PageHeader';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -601,18 +602,13 @@ const AdminConfessionPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-            <Shield className="text-red-600" size={36} />
-            Confession Management Console
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Administrative oversight and analytics for student concerns
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
+      <PageHeader 
+        title="Confession Management Console" 
+        subtitle="Administrative oversight and analytics for employee concerns" 
+        icon={Shield} 
+      />
+      <div className="max-w-7xl mx-auto px-6 mt-8">
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6">

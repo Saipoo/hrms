@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import PageHeader from '../components/PageHeader';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -132,18 +133,13 @@ const TeacherConfessionPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-            <MessageSquare className="text-green-600" size={36} />
-            Student Confessions
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Review and respond to student concerns assigned to you
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
+      <PageHeader 
+        title="Employee Concerns" 
+        subtitle="Review and respond to employee concerns assigned to you" 
+        icon={MessageSquare} 
+      />
+      <div className="max-w-7xl mx-auto px-6 mt-8">
 
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">

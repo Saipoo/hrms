@@ -13,6 +13,9 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
+
 
 const CertificatesPage = () => {
   const { user } = useAuth();
@@ -192,22 +195,13 @@ const CertificatesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-            My Certificates 🏆
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            View and download all your earned certificates
-          </p>
-        </motion.div>
-
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Achievements & Badges"
+    >
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Filters and Search */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -247,7 +241,7 @@ const CertificatesPage = () => {
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
-                CourseMaster ({certificates.filter(c => c.type === 'course').length})
+                Training Programs ({certificates.filter(c => c.type === 'course').length})
               </button>
               <button
                 onClick={() => setFilterType('grade')}
@@ -257,7 +251,7 @@ const CertificatesPage = () => {
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
-                GradeMaster ({certificates.filter(c => c.type === 'grade').length})
+                Performance Reviews ({certificates.filter(c => c.type === 'grade').length})
               </button>
             </div>
           </div>
@@ -282,14 +276,14 @@ const CertificatesPage = () => {
               <h3 className="text-3xl font-bold text-gray-800 dark:text-white mb-1">
                 {certificates.filter(c => c.type === 'course').length}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">CourseMaster</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Training Programs</p>
             </div>
             <div className="bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/30 rounded-xl p-6 shadow-lg">
               <FileText className="w-10 h-10 text-purple-600 mb-3" />
               <h3 className="text-3xl font-bold text-gray-800 dark:text-white mb-1">
                 {certificates.filter(c => c.type === 'grade').length}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">GradeMaster</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Performance Reviews</p>
             </div>
           </motion.div>
         )}
@@ -330,6 +324,7 @@ const CertificatesPage = () => {
         )}
       </div>
     </div>
+    </DashboardLayout>
   );
 };
 

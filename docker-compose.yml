@@ -1,0 +1,47 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: always
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb+srv://alltimebest68:Poorna%40123@cluster0.vn5g362.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      - NODE_ENV=production
+      - FRONTEND_URL=http://localhost:5173
+      # Add other env vars here or use env_file. 
+      # Assuming JWT_SECRET and others are needed, defaulting for demo:
+      - JWT_SECRET=docker_jwt_secret
+      - JWT_EXPIRE=7d
+      - ENCRYPTION_KEY=your_32_character_encryption_key_1
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    restart: always
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:

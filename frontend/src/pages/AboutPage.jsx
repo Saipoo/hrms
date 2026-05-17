@@ -5,10 +5,12 @@ import {
   Loader, CheckCircle, XCircle, Send, Heart 
 } from 'lucide-react';
 import axios from 'axios';
+import PageHeader from '../components/PageHeader';
+import { Info } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-const AboutPage = ({ userRole = 'student' }) => {
+const AboutPage = ({ userRole = 'employee' }) => {
   const [platformInfo, setPlatformInfo] = useState(null);
   const [teamInfo, setTeamInfo] = useState(null);
   const [versionInfo, setVersionInfo] = useState(null);
@@ -26,9 +28,9 @@ const AboutPage = ({ userRole = 'student' }) => {
 
   // Role-based colors
   const roleColors = {
-    student: 'blue',
-    teacher: 'purple',
-    parent: 'green'
+    employee: 'blue',
+    manager: 'purple',
+    hr: 'green'
   };
 
   const color = roleColors[userRole] || 'blue';
@@ -101,31 +103,12 @@ const AboutPage = ({ userRole = 'student' }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className={`bg-gradient-to-r from-${color}-600 to-${color}-700 text-white py-20 px-6`}
-      >
-        <div className="max-w-6xl mx-auto">
-          <motion.h1
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="text-5xl font-bold mb-4"
-          >
-            {platformInfo?.title || 'About ConnectBook'}
-          </motion.h1>
-          <motion.p
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="text-xl opacity-90 max-w-3xl"
-          >
-            {platformInfo?.mission || ''}
-          </motion.p>
-        </div>
-      </motion.div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
+      <PageHeader 
+        title={platformInfo?.title || 'About WorkSphere HRMS'} 
+        subtitle={platformInfo?.mission || 'Empowering Enterprises through Intelligent Workforce Management and AI-Driven Insights'}
+        icon={Info}
+      />
 
       {/* Platform Overview */}
       <div className="max-w-6xl mx-auto px-6 py-16">
@@ -135,7 +118,7 @@ const AboutPage = ({ userRole = 'student' }) => {
           transition={{ delay: 0.2 }}
         >
           <h2 className="text-3xl font-bold text-gray-800 mb-6">
-            What is ConnectBook?
+            What is WorkSphere HRMS?
           </h2>
           <p className="text-lg text-gray-600 leading-relaxed mb-8">
             {platformInfo?.description || ''}
@@ -202,7 +185,7 @@ const AboutPage = ({ userRole = 'student' }) => {
               Meet the {teamInfo?.teamName || 'IDEA_CRAP'} Team
             </h2>
             <p className="text-gray-600">
-              The brilliant minds behind ConnectBook
+              The professional team behind WorkSphere HRMS
             </p>
           </div>
 
@@ -297,7 +280,7 @@ const AboutPage = ({ userRole = 'student' }) => {
               Powered By
             </h2>
             <p className="text-gray-600">
-              Cutting-edge technologies driving ConnectBook
+              Cutting-edge technologies driving WorkSphere HRMS
             </p>
           </div>
 
@@ -465,7 +448,7 @@ const AboutPage = ({ userRole = 'student' }) => {
             <span>by the {teamInfo?.teamName || 'IDEA_CRAP'} Team</span>
           </div>
           <p className="text-sm">
-            ConnectBook © 2025 • Transforming Education Through AI
+            WorkSphere HRMS © 2025 • Precision in Workforce Management
           </p>
         </motion.div>
       </div>

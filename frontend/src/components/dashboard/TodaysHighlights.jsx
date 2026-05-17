@@ -68,12 +68,12 @@ const TodaysHighlights = () => {
 
   const getCategoryLabel = (category) => {
     const labels = {
-      'education': 'Education',
+      'education': 'Training',
       'ai-tech': 'AI & Tech',
-      'jobs-internships': 'Jobs',
-      'motivation': 'Motivation',
-      'startups-ceos': 'Startups',
-      'general-knowledge': 'General'
+      'jobs-internships': 'Internal Openings',
+      'motivation': 'Corporate Spirit',
+      'startups-ceos': 'Leadership',
+      'general-knowledge': 'Company News'
     };
     return labels[category] || category;
   };
@@ -101,7 +101,7 @@ const TodaysHighlights = () => {
           <h2 className="text-xl font-bold text-gray-900">Today's Highlights</h2>
         </div>
         <button
-          onClick={() => navigate('/dashboard/student/updates')}
+          onClick={() => navigate('/dashboard/employee/updates')}
           className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center"
         >
           View All
@@ -134,7 +134,7 @@ const TodaysHighlights = () => {
       {/* Featured Job */}
       {highlights.featuredJob && (
         <div className="bg-green-50 rounded-lg p-4 mb-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-             onClick={() => navigate('/dashboard/student/updates')}>
+             onClick={() => navigate('/dashboard/employee/updates')}>
           <div className="flex items-start">
             <div className="bg-green-600 rounded-lg p-2 mr-3">
               <Briefcase className="w-5 h-5 text-white" />
@@ -170,7 +170,7 @@ const TodaysHighlights = () => {
           {highlights.trendingUpdates.slice(0, 5).map((update, index) => (
             <div
               key={update._id}
-              onClick={() => navigate('/dashboard/student/updates')}
+              onClick={() => navigate('/dashboard/employee/updates')}
               className="bg-white rounded-lg p-3 hover:shadow-md transition-all cursor-pointer border border-gray-100"
             >
               <div className="flex items-start justify-between mb-2">
@@ -227,7 +227,7 @@ const TodaysHighlights = () => {
 
       {/* Call to Action */}
       <button
-        onClick={() => navigate('/dashboard/student/updates')}
+        onClick={() => navigate('/dashboard/employee/updates')}
         className="mt-4 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium flex items-center justify-center"
       >
         Explore All Updates

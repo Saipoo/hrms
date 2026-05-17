@@ -5,8 +5,12 @@ import {
   Send, Lightbulb, Award, Download, TrendingUp, Target
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
+import DashboardLayout from '../../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../../constants/menuItems';
+import { useAuth } from '../../../context/AuthContext';
 
 const InternshipWorkspace = () => {
+  const { user } = useAuth();
   const { enrollmentId } = useParams();
   const navigate = useNavigate();
   const [enrollment, setEnrollment] = useState(null);
@@ -132,13 +136,17 @@ const InternshipWorkspace = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 p-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Onboarding Workspace"
+    >
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 p-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
         <button
           onClick={() => navigate('/dashboard/student/internship')}
           className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors mb-4"
@@ -382,6 +390,7 @@ const InternshipWorkspace = () => {
         </div>
       </div>
     </div>
+    </DashboardLayout>
   );
 };
 

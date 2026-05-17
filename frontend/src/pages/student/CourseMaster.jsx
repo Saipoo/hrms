@@ -6,8 +6,13 @@ import CourseCard from '../../components/CourseCard';
 import VideoPlayer from '../../components/VideoPlayer';
 import QuizComponent from '../../components/QuizComponent';
 import CertificateViewer from '../../components/CertificateViewer';
+import PageHeader from '../../components/PageHeader';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
+import { useAuth } from '../../context/AuthContext';
 
 const CourseMaster = () => {
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [myEnrollments, setMyEnrollments] = useState([]);
@@ -26,17 +31,16 @@ const CourseMaster = () => {
 
   const categories = [
     'all',
-    'Programming',
-    'Data Science',
-    'Web Development',
-    'Mobile Development',
-    'Machine Learning',
-    'Artificial Intelligence',
-    'Database',
-    'Networking',
-    'Cybersecurity',
-    'Cloud Computing',
-    'DevOps',
+    'Leadership',
+    'Professional Skills',
+    'Technical Training',
+    'AI & Automation',
+    'Compliance',
+    'Wellbeing',
+    'Software Engineering',
+    'Data & Analytics',
+    'Product Management',
+    'Design',
     'Other'
   ];
 
@@ -238,20 +242,10 @@ const CourseMaster = () => {
   // Browse View
   if (view === 'browse') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-              <BookOpen className="w-10 h-10 text-blue-600" />
-              CourseMaster
-            </h1>
-            <p className="text-gray-600">Explore courses and expand your knowledge</p>
-          </motion.div>
+      <DashboardLayout menuItems={EMPLOYEE_MENU} role={user?.role || 'student'}>
+        <div className="min-h-screen">
+
+        <div className="max-w-7xl mx-auto p-6">
 
           {/* Search and Filters */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -376,15 +370,18 @@ const CourseMaster = () => {
             </div>
           )}
         </div>
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   // Course Detail View
   if (view === 'course-detail' && selectedCourse) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6">
-        <div className="max-w-7xl mx-auto">
+      <DashboardLayout menuItems={EMPLOYEE_MENU} role={user?.role || 'student'}>
+        <div className="min-h-screen">
+
+        <div className="max-w-7xl mx-auto p-6">
           {/* Back Button */}
           <motion.button
             initial={{ opacity: 0, x: -20 }}
@@ -634,14 +631,14 @@ const CourseMaster = () => {
           </div>
         </div>
 
-        {/* Certificate Modal */}
         {showCertificate && certificate && (
           <CertificateViewer
             certificate={certificate}
             onClose={() => setShowCertificate(false)}
           />
         )}
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 

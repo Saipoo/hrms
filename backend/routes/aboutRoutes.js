@@ -14,7 +14,7 @@ const teamInfo = {
       id: 1,
       name: 'A POORNA SESHASEYAN',
       role: 'Senior Software Developer',
-      bio: 'Full-stack developer specializing in AI integration, backend architecture, and scalable systems. Lead developer for ConnectBook\'s core features including GradeMaster, CourseMaster, and AI Chatbot.',
+      bio: 'Full-stack developer specializing in AI integration, backend architecture, and scalable systems. Lead developer for WorkSphere\'s core features including GradeMaster KPI tracking, CourseMaster training, and AI Chatbot.',
       image: '/team/poorna.jpg',
       linkedin: 'https://linkedin.com/in/poorna-seshaseyan',
       github: 'https://github.com/poorna-seshaseyan',
@@ -29,7 +29,7 @@ const teamInfo = {
       id: 2,
       name: 'Rakshith Subramanya Ravi',
       role: 'Team Lead',
-      bio: 'Project manager and technical architect overseeing ConnectBook\'s development lifecycle. Expert in agile methodologies, system design, and team coordination.',
+      bio: 'Project manager and technical architect overseeing WorkSphere\'s development lifecycle. Expert in agile methodologies, system design, and team coordination.',
       image: '/team/rakshith.jpg',
       linkedin: 'https://linkedin.com/in/rakshith-subramanya',
       github: 'https://github.com/rakshith-subramanya',
@@ -44,7 +44,7 @@ const teamInfo = {
       id: 3,
       name: 'Chinmaya S Shetty',
       role: 'Senior Data and Product Analyst',
-      bio: 'Data scientist and product strategist driving ConnectBook\'s analytics, insights, and feature optimization. Expert in educational data analysis and user behavior patterns.',
+      bio: 'Data scientist and product strategist driving WorkSphere\'s analytics, insights, and feature optimization. Expert in enterprise data analysis and workforce behavior patterns.',
       image: '/team/chinmaya.jpg',
       linkedin: 'https://linkedin.com/in/chinmaya-shetty',
       github: 'https://github.com/chinmaya-shetty',
@@ -59,7 +59,7 @@ const teamInfo = {
       id: 4,
       name: 'Ajay S Patil',
       role: 'Senior Software Tester',
-      bio: 'Quality assurance specialist ensuring ConnectBook\'s reliability, performance, and user experience. Expert in automated testing, bug tracking, and system validation.',
+      bio: 'Quality assurance specialist ensuring WorkSphere\'s reliability, performance, and user experience. Expert in automated testing, bug tracking, and system validation.',
       image: '/team/ajay.jpg',
       linkedin: 'https://linkedin.com/in/ajay-patil',
       github: 'https://github.com/ajay-patil',
@@ -111,54 +111,54 @@ const teamInfo = {
  * Platform overview
  */
 const platformOverview = {
-  title: 'ConnectBook - AI-Powered Educational Platform',
-  mission: 'To revolutionize education through AI-driven learning, assessment, and collaboration tools that connect students, teachers, and parents in a unified ecosystem.',
-  description: 'ConnectBook is a comprehensive educational platform that integrates cutting-edge AI technologies with traditional learning methods. Our platform offers a complete suite of tools designed to enhance the educational experience for all stakeholders.',
+  title: 'WorkSphere HRMS - Next-Gen Workforce Management',
+  mission: 'To empower organizations through intelligent workforce management, biometric excellence, and AI-driven insights that foster employee growth and operational efficiency.',
+  description: 'WorkSphere HRMS is a state-of-the-art Human Resource Management System that bridges the gap between traditional HR practices and modern AI-driven solutions. Our platform provides a unified ecosystem for employee attendance, performance tracking, skill development, and professional growth.',
   keyFeatures: [
     {
-      icon: '🎓',
-      name: 'CourseMaster',
-      description: 'Browse, enroll, and complete courses with automatic certificate generation'
+      icon: '🏢',
+      name: 'Training Programs (CourseMaster)',
+      description: 'Upskill employees with curated corporate training modules and automatic certification upon completion.'
     },
     {
-      icon: '📊',
-      name: 'GradeMaster',
-      description: 'AI-powered grading system with detailed feedback and performance analytics'
+      icon: '📈',
+      name: 'Performance KPIs (GradeMaster)',
+      description: 'AI-powered performance evaluation system with detailed feedback and workforce analytics.'
     },
     {
-      icon: '📚',
-      name: 'Study Planner',
-      description: 'AI-generated personalized study schedules and task management'
+      icon: '🗓️',
+      name: 'Duty Roster & Planner',
+      description: 'Intelligent scheduling and project planning tools for optimized team coordination.'
     },
     {
-      icon: '💼',
-      name: 'Career Advisor',
-      description: 'AI-driven career guidance and recommendations based on skills and interests'
+      icon: '🧭',
+      name: 'Career Path Advisor',
+      description: 'AI-driven internal growth recommendations based on employee performance and skills.'
     },
     {
-      icon: '🎤',
-      name: 'Interview Simulator',
-      description: 'Practice interviews with AI feedback on responses and presentation'
+      icon: '🤝',
+      name: 'Role Transition Prep',
+      description: 'Simulated interview and skill assessments for internal promotions and role changes.'
     },
     {
-      icon: '💡',
-      name: 'Internship Simulator',
-      description: 'Real-world project simulations with task tracking and evaluations'
+      icon: '🚀',
+      name: 'Onboarding Center',
+      description: 'Comprehensive simulation-based onboarding for new hires to master company workflows.'
     },
     {
-      icon: '📝',
-      name: 'Lecture Short Notes',
-      description: 'AI-generated concise notes from video lecture transcriptions'
+      icon: '📄',
+      name: 'Company Policies (Lectures)',
+      description: 'Centralized repository of training videos and policy documents with AI-generated summaries.'
     },
     {
-      icon: '🔗',
-      name: 'MentorConnect',
-      description: 'Seamless communication between students, teachers, and parents'
+      icon: '🗨️',
+      name: 'Manager Support (MentorConnect)',
+      description: 'Seamless communication and feedback loops between employees, managers, and HR.'
     },
     {
-      icon: '📰',
-      name: 'Real-Time Updates',
-      description: 'AI-curated news about education, technology, jobs, and motivation'
+      icon: '📢',
+      name: 'HR Announcements',
+      description: 'AI-curated company news, industry trends, and motivational corporate updates.'
     },
     {
       icon: '🤖',
@@ -167,10 +167,10 @@ const platformOverview = {
     }
   ],
   stats: {
-    courses: '500+',
-    students: '10,000+',
-    teachers: '500+',
-    certificates: '5,000+'
+    modules: '200+',
+    employees: '5,000+',
+    managers: '150+',
+    certifications: '3,000+'
   }
 };
 

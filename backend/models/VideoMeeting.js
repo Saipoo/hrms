@@ -9,33 +9,27 @@ const videoMeetingSchema = new mongoose.Schema({
   },
   teacherId: {
     type: String,
-    required: [true, 'Teacher ID is required'],
     trim: true
   },
   teacherName: {
     type: String,
-    required: [true, 'Teacher name is required'],
     trim: true
   },
   parentId: {
     type: String,
-    required: [true, 'Parent ID is required'],
     trim: true
   },
   parentName: {
     type: String,
-    required: [true, 'Parent name is required'],
     trim: true
   },
   studentUSN: {
     type: String,
-    required: [true, 'Student USN is required'],
     uppercase: true,
     trim: true
   },
   studentName: {
     type: String,
-    required: [true, 'Student name is required'],
     trim: true
   },
   title: {

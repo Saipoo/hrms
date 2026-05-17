@@ -69,9 +69,9 @@ const courseSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['Programming', 'Data Science', 'Web Development', 'Mobile Development', 
-           'Machine Learning', 'Artificial Intelligence', 'Database', 'Networking', 
-           'Cybersecurity', 'Cloud Computing', 'DevOps', 'Other']
+    enum: ['Leadership', 'Professional Skills', 'Technical Training', 'AI & Automation', 
+           'Compliance', 'Wellbeing', 'Software Engineering', 'Data & Analytics', 
+           'Product Management', 'Design', 'Other']
   },
   thumbnailUrl: {
     type: String,
@@ -92,6 +92,10 @@ const courseSchema = new mongoose.Schema({
   teacherDepartment: {
     type: String,
     default: ''
+  },
+  empid: {
+    type: String,
+    required: true
   },
   published: {
     type: Boolean,

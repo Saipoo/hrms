@@ -1,0 +1,80 @@
+import {
+  User,
+  MapPin,
+  Clock,
+  Calendar,
+  LogOut,
+  CheckCircle,
+  History,
+  BookOpen,
+  MessageSquare,
+  Briefcase,
+  Award,
+  Code,
+  Trophy,
+  Target,
+  Brain,
+  FileText,
+  Video,
+  Newspaper,
+  HelpCircle,
+  Info,
+  TrendingUp,
+  LayoutDashboard,
+  Heart
+} from 'lucide-react';
+
+export const EMPLOYEE_MENU = [
+  { label: 'Overview', path: '/dashboard/employee', icon: LayoutDashboard },
+  { label: 'Biometric Registry', path: '/dashboard/employee/face-register', icon: MapPin },
+  { label: 'Attendance Check-In', path: '/dashboard/employee/mark-attendance', icon: CheckCircle },
+  { label: 'Attendance History', path: '/dashboard/employee/attendance-history', icon: History },
+  { divider: true, label: 'Professional Growth' },
+  { label: 'KPIs & Performance', path: '/dashboard/employee/grade-master', icon: TrendingUp },
+  { label: 'Skills & Training', path: '/dashboard/employee/course-master', icon: BookOpen },
+  { label: 'Learning Progress', path: '/dashboard/employee/course-dashboard', icon: TrendingUp },
+  { label: 'Career Growth AI', path: '/dashboard/employee/career-advisor', icon: Target },
+  { label: 'AI Resume Builder', path: '/dashboard/employee/profile-builder', icon: FileText },
+  { divider: true, label: 'Collaboration' },
+  { label: 'Internship Simulator', path: '/dashboard/employee/onboarding', icon: Code },
+  { label: 'Interview Simulator', path: '/dashboard/employee/interview', icon: Briefcase },
+  { label: 'Innovation Challenges', path: '/dashboard/employee/challenges', icon: Trophy },
+  { label: 'Duty Roster', path: '/dashboard/employee/planner', icon: Brain },
+  { label: 'Manager Support', path: '/mentor-connect', icon: MessageSquare },
+  { divider: true, label: 'Information' },
+  { label: 'Company Policies', path: '/dashboard/employee/documents', icon: Video },
+  { label: 'HR Announcements', path: '/dashboard/employee/updates', icon: Newspaper },
+  { label: 'Profile Settings', path: '/dashboard/employee/profile', icon: User },
+  { label: 'Help & Support', path: '/dashboard/employee/faq', icon: HelpCircle },
+  { label: 'About WorkSphere', path: '/dashboard/employee/about', icon: Info }
+];
+
+export const MANAGER_MENU = [
+  { label: 'Overview', path: '/dashboard/manager', icon: LayoutDashboard },
+  { label: 'Roster Management', path: '/dashboard/manager/timetable', icon: Calendar },
+  { label: 'Attendance Logs', path: '/dashboard/manager/attendance-logs', icon: History },
+  { label: 'Performance Evaluator', path: '/dashboard/manager/grade-evaluator', icon: TrendingUp },
+  { divider: true, label: 'Development' },
+  { label: 'Training Creator', path: '/dashboard/manager/course-creator', icon: BookOpen },
+  { label: 'Training Dashboard', path: '/dashboard/manager/course-dashboard', icon: TrendingUp },
+  { label: 'Lectures', path: '/dashboard/manager/lectures', icon: Video },
+  { divider: true, label: 'Reports' },
+  { label: 'Interview Evaluations', path: '/dashboard/manager/interview-evaluations', icon: Award },
+  { label: 'Internship Reports', path: '/dashboard/manager/internship-reports', icon: Briefcase },
+  { label: 'Hackathon Reports', path: '/dashboard/manager/hackathon-reports', icon: Trophy },
+  { divider: true, label: 'Feedback' },
+  { label: 'Confessions/Feedback', path: '/dashboard/manager/confessions', icon: MessageSquare },
+  { label: 'Mentor Connect', path: '/mentor-connect', icon: User },
+  { label: 'Help & Support', path: '/dashboard/manager/faq', icon: HelpCircle },
+  { label: 'About WorkSphere', path: '/dashboard/manager/about', icon: Info }
+];
+
+export const HR_MENU = [
+  { label: 'Overview', path: '/dashboard/hr', icon: LayoutDashboard },
+  { label: 'Employee Performance', path: '/dashboard/hr/grades', icon: TrendingUp },
+  { label: 'Certification Audit', path: '/dashboard/hr/certificates', icon: Award },
+  { label: 'Employee Wellbeing', path: '/dashboard/hr/wellbeing', icon: Heart },
+  { label: 'Mentor Connect', path: '/mentor-connect', icon: User },
+  { label: 'Help & Support', path: '/dashboard/hr/faq', icon: HelpCircle },
+  { label: 'About WorkSphere', path: '/dashboard/hr/about', icon: Info }
+];

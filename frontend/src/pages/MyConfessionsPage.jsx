@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import PageHeader from '../components/PageHeader';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -104,32 +105,22 @@ const MyConfessionsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-                <MessageSquare className="text-purple-600" size={36} />
-                My Confessions
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Track the status of your submitted concerns
-              </p>
-            </div>
-            <button
-              onClick={fetchMyConfessions}
-              className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
-            >
-              <RefreshCw size={18} />
-              <span>Refresh</span>
-            </button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <PageHeader 
+        title="My Feedback" 
+        subtitle="Track the status of your submitted feedback" 
+        icon={MessageSquare} 
+      />
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header Actions */}
+        <div className="flex items-center justify-between mb-8 mt-4">
+          <button
+            onClick={fetchMyConfessions}
+            className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            <RefreshCw size={18} />
+            <span>Refresh</span>
+          </button>
 
           {/* Filters */}
           <div className="flex gap-2">
@@ -164,7 +155,7 @@ const MyConfessionsPage = () => {
               Resolved ({confessions.filter(c => c.status === 'Resolved').length})
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Confessions List */}
         {filteredConfessions.length === 0 ? (
@@ -175,10 +166,10 @@ const MyConfessionsPage = () => {
           >
             <MessageSquare size={64} className="mx-auto text-gray-300 mb-4" />
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              No Confessions Yet
+              No Feedback Yet
             </h2>
             <p className="text-gray-600 mb-6">
-              You haven't submitted any concerns. Your space is always safe when you need it.
+              You haven't submitted any feedback. Your space is always safe when you need it.
             </p>
           </motion.div>
         ) : (

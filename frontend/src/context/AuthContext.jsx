@@ -40,19 +40,26 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, role) => {
     try {
       const response = await api.post('/auth/login', { email, password, role });
-      
+
       if (response.data.success) {
         const { token, user } = response.data;
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         setToken(token);
         setUser(user);
-        
+
         toast.success(`Welcome back, ${user.name}!`);
-        
-        // Redirect to appropriate dashboard
-        navigate(`/dashboard/${role.toLowerCase()}`);
-        
+
+        // Redirect to appropriate rebranded dashboard
+        const dashboardMap = {
+          student: 'employee',
+          teacher: 'manager',
+          parent: 'hr',
+          admin: 'admin'
+        };
+        const dashboardPath = dashboardMap[user.role.toLowerCase()] || user.role.toLowerCase();
+        navigate(`/dashboard/${dashboardPath}`);
+
         return { success: true };
       }
     } catch (error) {
@@ -65,7 +72,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await api.post('/auth/register', userData);
-      
+
       if (response.data.success) {
         toast.success('Registration successful! Please login.');
         navigate('/login');
@@ -78,13 +85,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (profileData) => {
+    try {
+      const response = await api.put('/auth/update-profile', profileData);
+
+      if (response.data.success) {
+        const { user: updatedUser } = response.data;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        toast.success('Profile updated successfully!');
+        return { success: true };
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Update failed';
+      toast.error(message);
+      return { success: false, message };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-    toast.success('Logged out successfully');
     navigate('/login');
+    toast.success('Logged out successfully');
   };
 
   const value = {
@@ -93,6 +118,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     register,
+    updateProfile,
     logout,
     isAuthenticated: !!token,
   };

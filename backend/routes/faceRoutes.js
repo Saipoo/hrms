@@ -48,10 +48,10 @@ const euclideanDistance = (embedding1, embedding2) => {
 // @access  Private (Student only)
 router.post('/register', protect, authorize('student'), async (req, res) => {
   try {
-    const { usn, name, department, class: className, embeddings } = req.body;
+    const { empid, name, department, designation, embeddings } = req.body;
 
     // Validation
-    if (!usn || !name || !department || !className || !embeddings || !Array.isArray(embeddings)) {
+    if (!empid || !name || !department || !designation || !embeddings || !Array.isArray(embeddings)) {
       return res.status(400).json({
         success: false,
         message: 'Please provide all required fields including face embeddings'
@@ -59,7 +59,7 @@ router.post('/register', protect, authorize('student'), async (req, res) => {
     }
 
     // Verify that the student exists
-    const student = await Student.findOne({ usn: usn.toUpperCase() });
+    const student = await Student.findOne({ empid: empid.toUpperCase() });
     if (!student) {
       return res.status(404).json({
         success: false,
@@ -68,11 +68,11 @@ router.post('/register', protect, authorize('student'), async (req, res) => {
     }
 
     // Check if face already registered
-    const existingFace = await StudentFace.findOne({ usn: usn.toUpperCase() });
+    const existingFace = await StudentFace.findOne({ empid: empid.toUpperCase() });
     if (existingFace) {
       return res.status(400).json({
         success: false,
-        message: 'Face already registered for this USN. Please contact admin to update.'
+        message: 'Face already registered for this EmpID. Please contact admin to update.'
       });
     }
 
@@ -81,10 +81,10 @@ router.post('/register', protect, authorize('student'), async (req, res) => {
 
     // Create face record
     const studentFace = await StudentFace.create({
-      usn: usn.toUpperCase(),
+      empid: empid.toUpperCase(),
       name,
       department,
-      class: className,
+      designation,
       embeddings,
       encryptedEmbeddings
     });
@@ -93,7 +93,7 @@ router.post('/register', protect, authorize('student'), async (req, res) => {
       success: true,
       message: 'Face registered successfully',
       data: {
-        usn: studentFace.usn,
+        empid: studentFace.empid,
         name: studentFace.name,
         registeredAt: studentFace.registeredAt
       }
@@ -116,7 +116,7 @@ router.post('/mark', protect, authorize('student'), async (req, res) => {
     const { embedding, subject } = req.body;
 
     console.log('=== Mark Attendance Request ===');
-    console.log('User USN:', req.user.usn);
+    console.log('User EmpID:', req.user.empid);
     console.log('Subject:', subject);
     console.log('Embedding length:', embedding?.length);
 
@@ -149,7 +149,7 @@ router.post('/mark', protect, authorize('student'), async (req, res) => {
       for (const storedEmbedding of face.embeddings) {
         const distance = euclideanDistance(embedding, storedEmbedding);
         
-        console.log(`Comparing with ${face.usn}: distance = ${distance}`);
+        console.log(`Comparing with ${face.empid}: distance = ${distance}`);
         
         if (distance < minDistance) {
           minDistance = distance;
@@ -158,7 +158,7 @@ router.post('/mark', protect, authorize('student'), async (req, res) => {
       }
     }
 
-    console.log(`Best match: ${bestMatch?.usn}, Min distance: ${minDistance}, Threshold: ${threshold}`);
+    console.log(`Best match: ${bestMatch?.empid}, Min distance: ${minDistance}, Threshold: ${threshold}`);
 
     // Check if match is within threshold
     if (minDistance > threshold) {
@@ -177,7 +177,7 @@ router.post('/mark', protect, authorize('student'), async (req, res) => {
 
     // Check if attendance already marked today for this subject
     const existingAttendance = await AttendanceLog.findOne({
-      usn: bestMatch.usn,
+      usn: bestMatch.empid, // Using usn in AttendanceLog for backward compatibility unless changed
       subject,
       date
     });
@@ -190,7 +190,7 @@ router.post('/mark', protect, authorize('student'), async (req, res) => {
     }
 
     // Get student details
-    const student = await Student.findOne({ usn: bestMatch.usn });
+    const student = await Student.findOne({ empid: bestMatch.empid });
 
     if (!student) {
       return res.status(404).json({
@@ -201,7 +201,7 @@ router.post('/mark', protect, authorize('student'), async (req, res) => {
 
     // Create attendance log
     const attendanceLog = await AttendanceLog.create({
-      usn: bestMatch.usn,
+      usn: bestMatch.empid,
       name: bestMatch.name,
       subject,
       date,
@@ -219,7 +219,7 @@ router.post('/mark', protect, authorize('student'), async (req, res) => {
       const io = req.app.get('io');
       if (io) {
         io.emit('attendanceMarked', {
-          usn: bestMatch.usn,
+          empid: bestMatch.empid,
           name: bestMatch.name,
           subject,
           date,
@@ -235,7 +235,7 @@ router.post('/mark', protect, authorize('student'), async (req, res) => {
       success: true,
       message: `Attendance marked successfully for ${bestMatch.name}`,
       data: {
-        usn: bestMatch.usn,
+        empid: bestMatch.empid,
         name: bestMatch.name,
         subject,
         date,
@@ -254,20 +254,20 @@ router.post('/mark', protect, authorize('student'), async (req, res) => {
   }
 });
 
-// @route   GET /api/face/check/:usn
-// @desc    Check if face is registered for a USN
+// @route   GET /api/face/check/:empid
+// @desc    Check if face is registered for a EmpID
 // @access  Private (Student only)
-router.get('/check/:usn', protect, authorize('student'), async (req, res) => {
+router.get('/check/:empid', protect, authorize('student'), async (req, res) => {
   try {
-    const { usn } = req.params;
+    const { empid } = req.params;
 
-    const studentFace = await StudentFace.findOne({ usn: usn.toUpperCase() });
+    const studentFace = await StudentFace.findOne({ empid: empid.toUpperCase() });
 
     res.status(200).json({
       success: true,
       registered: !!studentFace,
       data: studentFace ? {
-        usn: studentFace.usn,
+        empid: studentFace.empid,
         name: studentFace.name,
         registeredAt: studentFace.registeredAt
       } : null
@@ -281,14 +281,14 @@ router.get('/check/:usn', protect, authorize('student'), async (req, res) => {
   }
 });
 
-// @route   DELETE /api/face/delete/:usn
+// @route   DELETE /api/face/delete/:empid
 // @desc    Delete face registration (Admin only)
 // @access  Private (Admin only)
-router.delete('/delete/:usn', protect, authorize('admin'), async (req, res) => {
+router.delete('/delete/:empid', protect, authorize('admin'), async (req, res) => {
   try {
-    const { usn } = req.params;
+    const { empid } = req.params;
 
-    const deletedFace = await StudentFace.findOneAndDelete({ usn: usn.toUpperCase() });
+    const deletedFace = await StudentFace.findOneAndDelete({ empid: empid.toUpperCase() });
 
     if (!deletedFace) {
       return res.status(404).json({

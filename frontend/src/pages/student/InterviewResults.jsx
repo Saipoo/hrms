@@ -16,8 +16,12 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
+import { useAuth } from '../../context/AuthContext';
 
 const InterviewResults = () => {
+  const { user } = useAuth();
   const { reportId } = useParams();
   const navigate = useNavigate();
   const [report, setReport] = useState(null);
@@ -117,10 +121,13 @@ const InterviewResults = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Role Transition Prep"
+    >
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto">
           <button
             onClick={() => navigate('/dashboard/student/interview')}
             className="mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
@@ -345,7 +352,7 @@ const InterviewResults = () => {
           </motion.div>
         )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

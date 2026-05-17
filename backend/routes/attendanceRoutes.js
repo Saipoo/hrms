@@ -1,7 +1,21 @@
 import express from 'express';
 import AttendanceLog from '../models/AttendanceLog.js';
 import Student from '../models/Student.js';
+import OfficeLocation from '../models/OfficeLocation.js';
+import StudentFace from '../models/StudentFace.js';
 import { protect, authorize } from '../middleware/auth.js';
+
+// Calculate Euclidean distance between two embeddings
+const euclideanDistance = (embedding1, embedding2) => {
+  if (!embedding1 || !embedding2 || embedding1.length !== embedding2.length) {
+    return Infinity;
+  }
+  let sum = 0;
+  for (let i = 0; i < embedding1.length; i++) {
+    sum += Math.pow(embedding1[i] - embedding2[i], 2);
+  }
+  return Math.sqrt(sum);
+};
 
 const router = express.Router();
 
@@ -46,36 +60,36 @@ router.get('/logs', protect, authorize('teacher', 'admin'), async (req, res) => 
   }
 });
 
-// @route   GET /api/attendance/student/:usn
-// @desc    Get attendance logs for a specific student
-// @access  Private (Student, Parent, Teacher, Admin)
-router.get('/student/:usn', protect, async (req, res) => {
+// @route   GET /api/attendance/employee/:empid
+// @desc    Get attendance logs for a specific employee
+// @access  Private (Employee, HR, Manager, Admin)
+router.get('/employee/:empid', protect, async (req, res) => {
   try {
-    const { usn } = req.params;
-    console.log('📊 Fetching attendance for USN:', usn);
+    const { empid } = req.params;
+    console.log('📊 Fetching attendance for Employee ID:', empid);
     console.log('👤 User role:', req.userRole);
-    console.log('🔗 User linkedStudentUSN:', req.user.linkedStudentUSN);
+    console.log('🔗 User linkedEmpId:', req.user.linkedEmpId);
 
     // Authorization check
-    if (req.userRole === 'student' && req.user.usn !== usn.toUpperCase()) {
-      console.log('❌ Student unauthorized');
+    if (req.userRole === 'student' && req.user.empid !== empid.toUpperCase()) {
+      console.log('❌ Employee unauthorized');
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to view this student\'s attendance'
+        message: 'Not authorized to view this employee\'s attendance'
       });
     }
 
-    if (req.userRole === 'parent' && req.user.linkedStudentUSN !== usn.toUpperCase()) {
-      console.log('❌ Parent unauthorized:', req.user.linkedStudentUSN, '!==', usn.toUpperCase());
+    if (req.userRole === 'parent' && req.user.linkedEmpId !== empid.toUpperCase()) {
+      console.log('❌ HR unauthorized:', req.user.linkedEmpId, '!==', empid.toUpperCase());
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to view this student\'s attendance'
+        message: 'Not authorized to view this employee\'s attendance'
       });
     }
 
     // Get attendance logs
-    console.log('📊 Querying AttendanceLog for:', usn.toUpperCase());
-    const logs = await AttendanceLog.find({ usn: usn.toUpperCase() }).sort({ date: -1, time: -1 });
+    console.log('📊 Querying AttendanceLog for:', empid.toUpperCase());
+    const logs = await AttendanceLog.find({ empid: empid.toUpperCase() }).sort({ date: -1, time: -1 });
     console.log('📊 Found', logs.length, 'attendance logs');
 
     // Calculate statistics
@@ -86,7 +100,7 @@ router.get('/student/:usn', protect, async (req, res) => {
 
     res.status(200).json({
       success: true,
-      usn: usn.toUpperCase(),
+      empid: empid.toUpperCase(),
       statistics: {
         totalClasses,
         present: presentCount,
@@ -99,21 +113,21 @@ router.get('/student/:usn', protect, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error fetching student attendance',
+      message: 'Error fetching employee attendance',
       error: error.message
     });
   }
 });
 
 // @route   GET /api/attendance/my-attendance
-// @desc    Get attendance for logged-in student
-// @access  Private (Student only)
+// @desc    Get attendance for logged-in employee
+// @access  Private (Employee only)
 router.get('/my-attendance', protect, authorize('student'), async (req, res) => {
   try {
-    const usn = req.user.usn;
+    const empid = req.user.empid;
 
     // Get attendance logs
-    const logs = await AttendanceLog.find({ usn }).sort({ date: -1, time: -1 });
+    const logs = await AttendanceLog.find({ empid: empid }).sort({ date: -1, time: -1 });
 
     // Calculate statistics
     const totalClasses = logs.length;
@@ -169,26 +183,26 @@ router.get('/my-attendance', protect, authorize('student'), async (req, res) => 
 });
 
 // @route   POST /api/attendance/manual
-// @desc    Manually mark attendance (Teacher only)
-// @access  Private (Teacher only)
+// @desc    Manually mark attendance (Manager only)
+// @access  Private (Manager only)
 router.post('/manual', protect, authorize('teacher'), async (req, res) => {
   try {
-    const { usn, subject, status } = req.body;
+    const { empid, subject, status } = req.body;
 
     // Validation
-    if (!usn || !subject || !status) {
+    if (!empid || !subject || !status) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide USN, subject, and status'
+        message: 'Please provide Employee ID, subject, and status'
       });
     }
 
-    // Verify student exists
-    const student = await Student.findOne({ usn: usn.toUpperCase() });
-    if (!student) {
+    // Verify employee exists
+    const employee = await Student.findOne({ empid: empid.toUpperCase() });
+    if (!employee) {
       return res.status(404).json({
         success: false,
-        message: 'Student not found'
+        message: 'Employee not found'
       });
     }
 
@@ -199,7 +213,7 @@ router.post('/manual', protect, authorize('teacher'), async (req, res) => {
 
     // Check if attendance already marked
     const existingAttendance = await AttendanceLog.findOne({
-      usn: usn.toUpperCase(),
+      empid: empid.toUpperCase(),
       subject,
       date
     });
@@ -207,30 +221,30 @@ router.post('/manual', protect, authorize('teacher'), async (req, res) => {
     if (existingAttendance) {
       return res.status(400).json({
         success: false,
-        message: 'Attendance already marked for this student today'
+        message: 'Attendance already marked for this employee today'
       });
     }
 
     // Create attendance log
     const attendanceLog = await AttendanceLog.create({
-      usn: usn.toUpperCase(),
-      name: student.name,
+      empid: empid.toUpperCase(),
+      name: employee.name,
       subject,
       date,
       time,
       mode: 'Manual',
       status,
-      department: student.department,
-      class: student.class,
-      section: student.section,
-      markedBy: `Teacher: ${req.user.name}`
+      department: employee.department,
+      class: employee.class,
+      section: employee.section,
+      markedBy: `Manager: ${req.user.name}`
     });
 
     // Emit socket event
     const io = req.app.get('io');
     io.emit('attendance_marked', {
-      usn: usn.toUpperCase(),
-      name: student.name,
+      empid: empid.toUpperCase(),
+      name: employee.name,
       subject,
       date,
       time,
@@ -263,11 +277,11 @@ router.get('/stats', protect, authorize('admin'), async (req, res) => {
     const faceCount = await AttendanceLog.countDocuments({ mode: 'Face' });
     const manualCount = await AttendanceLog.countDocuments({ mode: 'Manual' });
 
-    // Get unique students who have marked attendance
-    const uniqueStudents = await AttendanceLog.distinct('usn');
+    // Get unique employees who have marked attendance
+    const uniqueEmployees = await AttendanceLog.distinct('empid');
 
-    // Get total students
-    const totalStudents = await Student.countDocuments();
+    // Get total employees
+    const totalEmployees = await Student.countDocuments();
 
     res.status(200).json({
       success: true,
@@ -277,8 +291,8 @@ router.get('/stats', protect, authorize('admin'), async (req, res) => {
         absentCount,
         faceRecognitionCount: faceCount,
         manualCount,
-        uniqueStudentsWithAttendance: uniqueStudents.length,
-        totalStudents,
+        uniqueEmployeesWithAttendance: uniqueEmployees.length,
+        totalEmployees,
         attendancePercentage: totalLogs > 0 ? ((presentCount / totalLogs) * 100).toFixed(2) : 0
       }
     });
@@ -313,6 +327,180 @@ router.delete('/:id', protect, authorize('admin'), async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting attendance log',
+      error: error.message
+    });
+  }
+});
+
+// ─────────────────────────────────────────────
+// Office Location Endpoints (HRMS Geolocation)
+// ─────────────────────────────────────────────
+
+// @route   GET /api/attendance/office-location
+// @desc    Get current office location settings
+// @access  Private (All authenticated users)
+router.get('/office-location', protect, async (req, res) => {
+  try {
+    const location = await OfficeLocation.findOne().sort({ updatedAt: -1 });
+    res.status(200).json({
+      success: true,
+      data: location || null
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching office location',
+      error: error.message
+    });
+  }
+});
+
+// @route   POST /api/attendance/office-location
+// @desc    Set / update office location (Admin only)
+// @access  Private (Admin only)
+router.post('/office-location', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { latitude, longitude, radius, locationName } = req.body;
+
+    if (latitude === undefined || longitude === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Latitude and longitude are required'
+      });
+    }
+
+    // Upsert — replace existing or create new
+    const existing = await OfficeLocation.findOne();
+    let location;
+
+    if (existing) {
+      existing.latitude = latitude;
+      existing.longitude = longitude;
+      if (radius) existing.radius = radius;
+      if (locationName) existing.locationName = locationName;
+      existing.setBy = req.user.name || 'Admin';
+      existing.updatedAt = new Date();
+      location = await existing.save();
+    } else {
+      location = await OfficeLocation.create({
+        latitude,
+        longitude,
+        radius: radius || 100,
+        locationName: locationName || 'Company Office',
+        setBy: req.user.name || 'Admin'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Office location updated successfully',
+      data: location
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating office location',
+      error: error.message
+    });
+  }
+});
+
+// @route   POST /api/attendance/mark
+// @desc    Mark attendance (Biometric or Remote)
+// @access  Private (Student)
+router.post('/mark', protect, authorize('student'), async (req, res) => {
+  try {
+    const { empid, subject, mode, status, latitude, longitude, locationVerified, sessionType, descriptor } = req.body;
+
+    // Check if attendance already marked today
+    const now = new Date();
+    const date = now.toISOString().split('T')[0];
+    
+    const existing = await AttendanceLog.findOne({
+      empid: empid.toUpperCase(),
+      subject,
+      date
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'Attendance already marked for this session today'
+      });
+    }
+
+    // Biometric Verification (if applicable)
+    if (mode === 'Face Recognition') {
+      if (!descriptor || !Array.isArray(descriptor)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Face embedding is required for biometric verification'
+        });
+      }
+
+      const studentFace = await StudentFace.findOne({ empid: empid.toUpperCase() });
+      if (!studentFace) {
+        return res.status(404).json({
+          success: false,
+          message: 'No registered face found for this Employee ID. Please register first.'
+        });
+      }
+
+      // Check against stored embeddings
+      let minDistance = Infinity;
+      const threshold = 0.6; // Standard face-api.js threshold for 'same person'
+
+      for (const storedEmbedding of studentFace.embeddings) {
+        const distance = euclideanDistance(descriptor, storedEmbedding);
+        if (distance < minDistance) minDistance = distance;
+      }
+
+      if (minDistance > threshold) {
+        return res.status(401).json({
+          success: false,
+          message: 'Face verification failed. Please ensure you are looking at the camera clearly.',
+          confidence: (1 - minDistance).toFixed(2)
+        });
+      }
+      
+      console.log(`✅ Biometric match for ${empid} (Distance: ${minDistance.toFixed(3)})`);
+    }
+
+    // Create log
+    const log = await AttendanceLog.create({
+      empid: empid.toUpperCase(),
+      name: req.user.name,
+      subject,
+      date,
+      time: now.toTimeString().split(' ')[0],
+      mode,
+      status: status || 'Present',
+      latitude,
+      longitude,
+      locationVerified,
+      sessionType,
+      department: req.user.department,
+      class: req.user.class,
+      section: req.user.section,
+      markedBy: `Employee: ${req.user.name}`
+    });
+
+    // Emit socket event
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('attendance_marked', log);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Attendance marked successfully',
+      data: log
+    });
+  } catch (error) {
+    console.error('Mark attendance error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error marking attendance',
       error: error.message
     });
   }

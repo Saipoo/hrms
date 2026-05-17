@@ -57,21 +57,21 @@ router.post('/register', async (req, res) => {
       case 'student':
         // Check if student already exists
         const existingStudent = await Student.findOne({ 
-          $or: [{ email }, { usn: additionalData.usn }] 
+          $or: [{ email }, { empid: additionalData.empid }] 
         });
         
         if (existingStudent) {
           return res.status(400).json({
             success: false,
-            message: 'Student with this email or USN already exists'
+            message: 'Employee with this email or EmpID already exists'
           });
         }
 
         // Validate student-specific fields
-        if (!additionalData.usn || !additionalData.department || !additionalData.class || !additionalData.section) {
+        if (!additionalData.empid || !additionalData.department || !additionalData.designation || !additionalData.team) {
           return res.status(400).json({
             success: false,
-            message: 'Please provide USN, Department, Class, and Section'
+            message: 'Please provide EmpID, Department, Designation, and Team'
           });
         }
 
@@ -79,75 +79,81 @@ router.post('/register', async (req, res) => {
           name,
           email,
           password: hashedPassword,
-          usn: additionalData.usn.toUpperCase(),
+          empid: additionalData.empid.toUpperCase(),
           department: additionalData.department,
-          class: additionalData.class,
-          section: additionalData.section.toUpperCase()
+          designation: additionalData.designation,
+          team: additionalData.team.toUpperCase()
         });
         break;
 
       case 'teacher':
         // Check if teacher already exists
-        const existingTeacher = await Teacher.findOne({ email });
+        const existingTeacher = await Teacher.findOne({ 
+          $or: [{ email }, { empid: additionalData.empid }] 
+        });
         
         if (existingTeacher) {
           return res.status(400).json({
             success: false,
-            message: 'Teacher with this email already exists'
+            message: 'Manager with this email or EmpID already exists'
           });
         }
 
         // Validate teacher-specific fields
-        if (!additionalData.department || !additionalData.subjects) {
+        if (!additionalData.empid || !additionalData.department || !additionalData.projects) {
           return res.status(400).json({
             success: false,
-            message: 'Please provide Department and Subjects'
+            message: 'Please provide EmpID, Department, and Projects'
           });
         }
 
         // Convert subjects to array if it's a string
-        let subjectsArray = additionalData.subjects;
-        if (typeof additionalData.subjects === 'string') {
-          subjectsArray = additionalData.subjects.split(',').map(s => s.trim());
+        let projectsArray = additionalData.projects;
+        if (typeof additionalData.projects === 'string') {
+          projectsArray = additionalData.projects.split(',').map(s => s.trim());
         }
 
         newUser = await Teacher.create({
           name,
           email,
           password: hashedPassword,
+          empid: additionalData.empid.toUpperCase(),
           department: additionalData.department,
-          subjects: subjectsArray
+          projects: projectsArray
         });
         break;
 
       case 'parent':
         // Check if parent already exists
-        const existingParent = await Parent.findOne({ email });
+        const existingParent = await Parent.findOne({ 
+          $or: [{ email }, { empid: additionalData.empid }] 
+        });
         
         if (existingParent) {
           return res.status(400).json({
             success: false,
-            message: 'Parent with this email already exists'
+            message: 'HR with this email or EmpID already exists'
           });
         }
 
         // Validate parent-specific fields
-        if (!additionalData.linkedStudentUSN) {
+        if (!additionalData.empid || !additionalData.department || !additionalData.linkedEmpId) {
           return res.status(400).json({
             success: false,
-            message: 'Please provide Linked Student USN'
+            message: 'Please provide EmpID, Department, and Linked Employee ID'
           });
         }
 
-        // Verify that the student USN exists
+        // Verify that the student USN exists and is in the same department
         const linkedStudent = await Student.findOne({ 
-          usn: additionalData.linkedStudentUSN.toUpperCase() 
+          empid: additionalData.linkedEmpId.toUpperCase(),
+          department: additionalData.department
         });
 
         if (!linkedStudent) {
           return res.status(400).json({
             success: false,
-            message: 'Student with provided USN does not exist'
+            message: 'Employee with provided EmpID in your Department does not exist'
           });
         }
 
@@ -155,7 +161,9 @@ router.post('/register', async (req, res) => {
           name,
           email,
           password: hashedPassword,
-          linkedStudentUSN: additionalData.linkedStudentUSN.toUpperCase()
+          empid: additionalData.empid.toUpperCase(),
+          department: additionalData.department,
+          linkedEmpId: additionalData.linkedEmpId.toUpperCase()
         });
         break;
 
@@ -197,17 +205,20 @@ router.post('/register', async (req, res) => {
         email: newUser.email,
         role: role.toLowerCase(),
         ...(role.toLowerCase() === 'student' && { 
-          usn: newUser.usn, 
+          empid: newUser.empid, 
           department: newUser.department,
-          class: newUser.class,
-          section: newUser.section
+          designation: newUser.designation,
+          team: newUser.team
         }),
         ...(role.toLowerCase() === 'teacher' && { 
+          empid: newUser.empid,
           department: newUser.department,
-          subjects: newUser.subjects
+          projects: newUser.projects
         }),
         ...(role.toLowerCase() === 'parent' && { 
-          linkedStudentUSN: newUser.linkedStudentUSN
+          empid: newUser.empid,
+          department: newUser.department,
+          linkedEmpId: newUser.linkedEmpId
         })
       }
     });
@@ -294,18 +305,22 @@ router.post('/login', async (req, res) => {
         name: user.name,
         email: user.email,
         role: role.toLowerCase(),
+        profilePhoto: user.profilePhoto,
         ...(role.toLowerCase() === 'student' && { 
-          usn: user.usn, 
+          empid: user.empid, 
           department: user.department,
-          class: user.class,
-          section: user.section
+          designation: user.designation,
+          team: user.team
         }),
         ...(role.toLowerCase() === 'teacher' && { 
+          empid: user.empid,
           department: user.department,
-          subjects: user.subjects
+          projects: user.projects
         }),
         ...(role.toLowerCase() === 'parent' && { 
-          linkedStudentUSN: user.linkedStudentUSN
+          empid: user.empid,
+          department: user.department,
+          linkedEmpId: user.linkedEmpId
         })
       }
     });
@@ -332,6 +347,76 @@ router.get('/me', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching user data',
+      error: error.message
+    });
+  }
+});
+
+// @route   PUT /api/auth/update-profile
+// @desc    Update user profile (Name, Email, Photo)
+// @access  Private
+router.put('/update-profile', protect, async (req, res) => {
+  try {
+    const { name, email, profilePhoto } = req.body;
+    const userRole = req.user.role.toLowerCase();
+    
+    let Model;
+    if (userRole === 'student') Model = Student;
+    else if (userRole === 'teacher') Model = Teacher;
+    else if (userRole === 'parent') Model = Parent;
+    else return res.status(400).json({ success: false, message: 'Invalid role' });
+
+    // Check if email is already taken by another user
+    if (email && email !== req.user.email) {
+      const emailExists = await Model.findOne({ email });
+      if (emailExists) {
+        return res.status(400).json({ success: false, message: 'Email already in use' });
+      }
+    }
+
+    const updatedFields = {};
+    if (name) updatedFields.name = name;
+    if (email) updatedFields.email = email;
+    if (profilePhoto !== undefined) updatedFields.profilePhoto = profilePhoto;
+
+    const updatedUser = await Model.findByIdAndUpdate(
+      req.user._id,
+      { $set: updatedFields },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        profilePhoto: updatedUser.profilePhoto,
+        ...(userRole === 'student' && { 
+          empid: updatedUser.empid, 
+          department: updatedUser.department,
+          designation: updatedUser.designation,
+          team: updatedUser.team
+        }),
+        ...(userRole === 'teacher' && { 
+          empid: updatedUser.empid,
+          department: updatedUser.department,
+          projects: updatedUser.projects
+        }),
+        ...(userRole === 'parent' && { 
+          empid: updatedUser.empid,
+          department: updatedUser.department,
+          linkedEmpId: updatedUser.linkedEmpId
+        })
+      }
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating profile',
       error: error.message
     });
   }

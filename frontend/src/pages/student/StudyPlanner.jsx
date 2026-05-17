@@ -14,6 +14,9 @@ import {
   Plus,
   Share2
 } from 'lucide-react';
+import PageHeader from '../../components/PageHeader';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
 
 const StudyPlanner = () => {
   const { user } = useAuth();
@@ -246,20 +249,18 @@ const StudyPlanner = () => {
   } = dashboardData || {};
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <BookOpen className="w-8 h-8 text-indigo-600" />
-                Study Planner
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Semester {plan?.semester || 'N/A'} • {plan?.academicYear || 'N/A'}
-              </p>
-            </div>
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Duty Roster"
+    >
+      <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header Actions */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 flex justify-between items-center">
+          <div className="text-gray-600">
+            Track your tasks and schedule
+          </div>
             
             <div className="flex items-center gap-4">
               <div className="text-center">
@@ -278,7 +279,6 @@ const StudyPlanner = () => {
               </button>
             </div>
           </div>
-        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -289,7 +289,7 @@ const StudyPlanner = () => {
                 <p className="text-2xl font-bold text-gray-900">
                   {(statistics?.totalStudyHours || 0).toFixed(1)}h
                 </p>
-                <p className="text-xs text-gray-500">of {plan?.weeklyGoalHours || 20}h goal</p>
+                <p className="text-xs text-gray-500">of {plan?.weeklyGoalHours || 40}h goal</p>
               </div>
               <Clock className="w-10 h-10 text-indigo-600" />
             </div>
@@ -384,8 +384,8 @@ const StudyPlanner = () => {
                   >
                     <TrendingUp className="w-6 h-6 text-orange-600" />
                     <div className="text-left">
-                      <div className="font-semibold text-orange-900">Sync Grades</div>
-                      <div className="text-sm text-orange-600">Update weak subjects</div>
+                      <div className="font-semibold text-orange-900">Sync Performance</div>
+                      <div className="text-sm text-orange-600">Update from KPI reviews</div>
                     </div>
                   </button>
 
@@ -687,11 +687,11 @@ const StudyPlanner = () => {
                     onChange={(e) => setNewTask({ ...newTask, type: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
-                    <option value="assignment">Assignment</option>
-                    <option value="revision">Revision</option>
-                    <option value="practice">Practice</option>
-                    <option value="project">Project</option>
-                    <option value="exam-prep">Exam Prep</option>
+                    <option value="task">Task</option>
+                    <option value="meeting">Meeting</option>
+                    <option value="milestone">Milestone</option>
+                    <option value="briefing">Briefing</option>
+                    <option value="review">Review</option>
                   </select>
                 </div>
 
@@ -905,7 +905,8 @@ const StudyPlanner = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

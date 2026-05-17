@@ -100,7 +100,7 @@ const careerQuizResultSchema = new mongoose.Schema({
 });
 
 const careerProfileSchema = new mongoose.Schema({
-  usn: {
+  empid: {
     type: String,
     required: true,
     unique: true,
@@ -402,7 +402,7 @@ const careerProfileSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Indexes
-careerProfileSchema.index({ usn: 1 });
+careerProfileSchema.index({ empid: 1 });
 careerProfileSchema.index({ 'chosenPaths.title': 1 });
 
 // Methods

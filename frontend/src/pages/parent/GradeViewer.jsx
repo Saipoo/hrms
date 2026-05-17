@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiAward, FiTrendingUp, FiBook, FiCalendar, FiCheckCircle } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+import PageHeader from '../../components/PageHeader';
 
 const GradeViewer = () => {
   const { user } = useAuth();
@@ -55,28 +56,13 @@ const GradeViewer = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center gap-4 mb-2">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl">
-              <FiAward className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-                Student Performance
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400">
-                View your child's verified grade reports
-              </p>
-            </div>
-          </div>
-        </motion.div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
+      <PageHeader 
+        title="Performance Reviews" 
+        subtitle="View and analyze performance metrics and feedback" 
+        icon={FiAward} 
+      />
+      <div className="max-w-7xl mx-auto px-6 mt-8">
 
         {/* Statistics Cards */}
         {results.length > 0 && (

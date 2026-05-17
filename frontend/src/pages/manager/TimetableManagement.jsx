@@ -16,6 +16,8 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import PageHeader from '../../components/PageHeader';
+
 
 const TimetableManagement = () => {
   const { user } = useAuth();
@@ -199,18 +201,15 @@ const TimetableManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-              Timetable Management
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Manage your class schedule and timetable entries
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <PageHeader 
+        title="Shift Schedule Management" 
+        subtitle="Manage your shift schedule and timetable entries" 
+        icon={Calendar} 
+      />
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header Actions */}
+        <div className="flex items-center justify-end mb-8 mt-4">
           <div className="flex gap-3">
             <label className="btn btn-secondary cursor-pointer flex items-center gap-2">
               <Upload className="w-5 h-5" />

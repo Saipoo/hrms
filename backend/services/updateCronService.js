@@ -8,49 +8,13 @@ import UpdateGeneratorService from '../services/updateGeneratorService.js';
 export function initializeUpdateCronJobs() {
   console.log('📅 Initializing Real-Time Updates cron jobs...');
 
-  // Run every 6 hours to generate new updates
-  // Cron expression: '0 */6 * * *' = At minute 0 past every 6th hour
-  cron.schedule('0 */6 * * *', async () => {
-    console.log('\n🤖 [CRON] Starting scheduled update generation...');
-    console.log(`⏰ Time: ${new Date().toLocaleString()}`);
-    
-    try {
-      // Generate new updates
-      const newUpdates = await UpdateGeneratorService.generateAllUpdates();
-      
-      // Filter AI-generated updates only
-      const aiUpdates = newUpdates.filter(u => u.aiGenerated === true);
-      
-      if (aiUpdates.length > 0) {
-        try {
-          // Save to database with boosted priority and recent timestamp
-          const updatesWithBoost = aiUpdates.map(update => ({
-            ...update,
-            postedAt: new Date(), // Fresh timestamp
-            priority: Math.min(update.priority + 1, 10) // Boost priority (max 10)
-          }));
-          
-          const savedUpdates = await RealTimeUpdate.insertMany(updatesWithBoost);
-          console.log(`✅ [CRON] Saved ${savedUpdates.length} new AI updates`);
-          
-          // Log category breakdown
-          const breakdown = savedUpdates.reduce((acc, update) => {
-            acc[update.category] = (acc[update.category] || 0) + 1;
-            return acc;
-          }, {});
-          console.log('📊 [CRON] Category breakdown:', breakdown);
-        } catch (saveError) {
-          console.error('❌ [CRON] Error saving updates:', saveError.message);
-          console.log('💡 [CRON] Tip: Check for validation errors in update data');
-        }
-      } else {
-        console.log('⚠️ [CRON] No AI updates generated, dummy data remains available');
-      }
-    } catch (error) {
-      console.error('❌ [CRON] Error generating updates:', error.message);
-      console.log('✅ [CRON] Existing dummy updates still available for students');
-    }
+  // Run daily at midnight to generate new updates
+  // Disabled for now to prevent Gemini API quota issues
+  /*
+  cron.schedule('0 0 * * *', async () => {
+    // ... generation logic
   });
+  */
 
   // Run daily at midnight to clean old updates (30+ days old)
   // Cron expression: '0 0 * * *' = At 00:00 every day
@@ -99,49 +63,18 @@ export function initializeUpdateCronJobs() {
           }
         }
         
-        // Step 2: Try to generate AI updates (will appear on top due to newer postedAt)
-        console.log('🤖 [STARTUP] Attempting AI update generation...');
+        // Step 2: AI generation disabled for now to prevent quota errors
+        console.log('🤖 [STARTUP] AI generation is currently disabled (Quota management). Using dummy data only.');
+        /*
         try {
           const aiUpdates = await UpdateGeneratorService.generateAllUpdates();
-          
-          if (aiUpdates.length > 0) {
-            // Filter out dummy updates from AI response (if any)
-            const realAIUpdates = aiUpdates.filter(u => u.aiGenerated === true);
-            
-            if (realAIUpdates.length > 0) {
-              // Set postedAt to be newer than dummy data and normalize
-              const aiUpdatesWithTime = realAIUpdates.map(update => 
-                UpdateGeneratorService.normalizeUpdateData({
-                  ...update,
-                  postedAt: new Date(Date.now() + 1000), // 1 second newer
-                  priority: Math.min((update.priority || 5) + 1, 10) // Boost priority (max 10)
-                })
-              );
-              
-              const savedAI = await RealTimeUpdate.insertMany(aiUpdatesWithTime, {
-                ordered: false, // Continue even if some fail
-                rawResult: true
-              });
-              console.log(`✅ [STARTUP] Generated ${savedAI.length || aiUpdatesWithTime.length} AI updates (will show first)`);
-            } else {
-              console.log('⚠️ [STARTUP] AI generation returned only dummy data');
-              console.log('💡 [STARTUP] Tip: This usually means API quota is exceeded');
-            }
-          } else {
-            console.log('⚠️ [STARTUP] AI generation produced no updates, using dummy data only');
-            console.log('💡 [STARTUP] Gemini API quotas reset at midnight Pacific Time');
-          }
+          // ... AI generation logic
         } catch (aiError) {
-          console.error('❌ [STARTUP] AI generation failed:', aiError.message);
-          if (aiError.message.includes('API key') || aiError.message.includes('quota') || aiError.message.includes('INVALID')) {
-            console.log('💡 [STARTUP] API Quota Issue Detected');
-            console.log('📊 [STARTUP] Gemini Free Tier: 15 requests/min, 1,500 requests/day');
-            console.log('📅 [STARTUP] Quota resets: Midnight Pacific Time');
-            console.log('⏰ [STARTUP] Current time:', new Date().toLocaleString());
-          }
-          console.log('✅ [STARTUP] Dummy updates are available as fallback');
-          console.log('👥 [STARTUP] Students can use Real-Time Updates feature now');
+          // ... AI error handling
         }
+        */
+        console.log('✅ [STARTUP] Dummy updates are available as fallback');
+        console.log('👥 [STARTUP] Employees can use Real-Time Updates feature now');
         
         // Final count
         const finalCount = await RealTimeUpdate.countDocuments({ isActive: true });

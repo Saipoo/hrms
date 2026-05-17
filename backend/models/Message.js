@@ -9,7 +9,6 @@ const messageSchema = new mongoose.Schema({
   senderRole: {
     type: String,
     required: [true, 'Sender role is required'],
-    enum: ['teacher', 'parent'],
     trim: true
   },
   receiverId: {
@@ -20,12 +19,10 @@ const messageSchema = new mongoose.Schema({
   receiverRole: {
     type: String,
     required: [true, 'Receiver role is required'],
-    enum: ['teacher', 'parent'],
     trim: true
   },
   studentUSN: {
     type: String,
-    required: [true, 'Student USN is required'],
     uppercase: true,
     trim: true
   },

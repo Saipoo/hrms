@@ -30,14 +30,14 @@ const Register = () => {
     confirmPassword: '',
     role: 'student',
     // Student fields
-    usn: '',
+    empid: '',
     department: '',
-    class: '',
-    section: '',
+    designation: '',
+    team: '',
     // Teacher fields
-    subjects: '',
+    projects: '',
     // Parent fields
-    linkedStudentUSN: ''
+    linkedEmpId: ''
   });
 
   const handleSubmit = async (e) => {
@@ -56,22 +56,22 @@ const Register = () => {
 
     // Role-specific validation
     if (formData.role === 'student') {
-      if (!formData.usn || !formData.department || !formData.class || !formData.section) {
-        toast.error('Please fill all student fields!');
+      if (!formData.empid || !formData.department || !formData.designation || !formData.team) {
+        toast.error('Please fill all employee fields!');
         return;
       }
     }
 
     if (formData.role === 'teacher') {
-      if (!formData.department || !formData.subjects) {
-        toast.error('Please fill all teacher fields!');
+      if (!formData.empid || !formData.department || !formData.projects) {
+        toast.error('Please fill all manager fields!');
         return;
       }
     }
 
     if (formData.role === 'parent') {
-      if (!formData.linkedStudentUSN) {
-        toast.error('Please provide linked student USN!');
+      if (!formData.empid || !formData.department || !formData.linkedEmpId) {
+        toast.error('Please provide EmpID, Department, and Linked Employee ID!');
         return;
       }
     }
@@ -100,14 +100,14 @@ const Register = () => {
           <Link to="/" className="inline-flex items-center gap-2 mb-4">
             <ScanFace className="w-12 h-12 text-primary-600" />
             <span className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-              ConnectBook
+              WorkSphere HRMS
             </span>
           </Link>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             Create Your Account
           </h2>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Join ConnectBook and digitalize your education
+            Join WorkSphere HRMS and transform your enterprise
           </p>
         </div>
 
@@ -247,10 +247,10 @@ const Register = () => {
                 onChange={handleChange}
                 className="input-field pl-10 appearance-none"
               >
-                <option value="student">👨‍🎓 Student</option>
-                <option value="teacher">👩‍🏫 Teacher</option>
-                <option value="parent">👩‍👧 Parent</option>
-                <option value="admin">🧑‍💼 Admin</option>
+                <option value="student">👨‍💼 Employee</option>
+                <option value="teacher">👩‍💼 Manager</option>
+                <option value="parent">🧑‍🤝‍🧑 HR</option>
+                <option value="admin">⚙️ Admin</option>
               </select>
             </div>
           </div>
@@ -265,27 +265,27 @@ const Register = () => {
             >
               <div className="md:col-span-2">
                 <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-4">
-                  Student Information
+                  Employee Information
                 </h3>
               </div>
 
               <div>
-                <label htmlFor="usn" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  USN *
+                <label htmlFor="empid" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  EmpID *
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Hash className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    id="usn"
-                    name="usn"
+                    id="empid"
+                    name="empid"
                     type="text"
                     required={formData.role === 'student'}
-                    value={formData.usn}
+                    value={formData.empid}
                     onChange={handleChange}
                     className="input-field pl-10"
-                    placeholder="1MS21CS001"
+                    placeholder="EMP001"
                   />
                 </div>
               </div>
@@ -306,41 +306,40 @@ const Register = () => {
                     value={formData.department}
                     onChange={handleChange}
                     className="input-field pl-10"
-                    placeholder="Computer Science"
+                    placeholder="Engineering"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="class" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Class *
+                <label htmlFor="designation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Designation *
                 </label>
                 <input
-                  id="class"
-                  name="class"
+                  id="designation"
+                  name="designation"
                   type="text"
                   required={formData.role === 'student'}
-                  value={formData.class}
+                  value={formData.designation}
                   onChange={handleChange}
                   className="input-field"
-                  placeholder="3rd Year"
+                  placeholder="Software Engineer"
                 />
               </div>
 
               <div>
-                <label htmlFor="section" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Section *
+                <label htmlFor="team" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Team *
                 </label>
                 <input
-                  id="section"
-                  name="section"
+                  id="team"
+                  name="team"
                   type="text"
                   required={formData.role === 'student'}
-                  value={formData.section}
+                  value={formData.team}
                   onChange={handleChange}
                   className="input-field"
-                  placeholder="A"
-                  maxLength={1}
+                  placeholder="Frontend"
                 />
               </div>
             </motion.div>
@@ -354,8 +353,29 @@ const Register = () => {
               className="space-y-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg"
             >
               <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300">
-                Teacher Information
+                Manager Information
               </h3>
+
+              <div>
+                <label htmlFor="empid" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  EmpID *
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Hash className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="empid"
+                    name="empid"
+                    type="text"
+                    required={formData.role === 'teacher'}
+                    value={formData.empid}
+                    onChange={handleChange}
+                    className="input-field pl-10"
+                    placeholder="MGR001"
+                  />
+                </div>
+              </div>
 
               <div>
                 <label htmlFor="department" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -373,28 +393,28 @@ const Register = () => {
                     value={formData.department}
                     onChange={handleChange}
                     className="input-field pl-10"
-                    placeholder="Computer Science"
+                    placeholder="Engineering"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="subjects" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Subjects (comma-separated) *
+                <label htmlFor="projects" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Projects (comma-separated) *
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <BookOpen className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    id="subjects"
-                    name="subjects"
+                    id="projects"
+                    name="projects"
                     type="text"
                     required={formData.role === 'teacher'}
-                    value={formData.subjects}
+                    value={formData.projects}
                     onChange={handleChange}
                     className="input-field pl-10"
-                    placeholder="Data Structures, Algorithms, DBMS"
+                    placeholder="Project Alpha, Project Beta"
                   />
                 </div>
               </div>
@@ -409,30 +429,72 @@ const Register = () => {
               className="space-y-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"
             >
               <h3 className="text-sm font-semibold text-green-800 dark:text-green-300">
-                Parent Information
+                HR Information
               </h3>
 
               <div>
-                <label htmlFor="linkedStudentUSN" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Linked Student USN *
+                <label htmlFor="empid" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Your EmpID *
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Hash className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="empid"
+                    name="empid"
+                    type="text"
+                    required={formData.role === 'parent'}
+                    value={formData.empid}
+                    onChange={handleChange}
+                    className="input-field pl-10"
+                    placeholder="HR001"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="department" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Department *
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Building className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="department"
+                    name="department"
+                    type="text"
+                    required={formData.role === 'parent'}
+                    value={formData.department}
+                    onChange={handleChange}
+                    className="input-field pl-10"
+                    placeholder="Engineering"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="linkedEmpId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Linked Employee ID *
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Users className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    id="linkedStudentUSN"
-                    name="linkedStudentUSN"
+                    id="linkedEmpId"
+                    name="linkedEmpId"
                     type="text"
                     required={formData.role === 'parent'}
-                    value={formData.linkedStudentUSN}
+                    value={formData.linkedEmpId}
                     onChange={handleChange}
                     className="input-field pl-10"
-                    placeholder="1MS21CS001"
+                    placeholder="EMP001"
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Enter your child's USN to link accounts
+                  Enter an employee's ID from your department to link accounts
                 </p>
               </div>
             </motion.div>

@@ -6,6 +6,7 @@ import {
   Edit, Trash2, Upload, Users, Award, Save, X
 } from 'lucide-react';
 import CourseCard from '../../components/CourseCard';
+import PageHeader from '../../components/PageHeader';
 
 const CourseCreator = () => {
   const [courses, setCourses] = useState([]);
@@ -197,18 +198,15 @@ const CourseCreator = () => {
   // List View
   if (view === 'list') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-                <BookOpen className="w-10 h-10 text-blue-600" />
-                Course Creator
-              </h1>
-              <p className="text-gray-600">Create and manage your courses</p>
-            </div>
-            
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+        <PageHeader 
+          title="Training Program Creator" 
+          subtitle="Create and manage your training programs" 
+          icon={BookOpen} 
+        />
+        <div className="max-w-7xl mx-auto p-6">
+          {/* Header Actions */}
+          <div className="flex justify-end items-center mb-8 mt-4">
             <div className="flex gap-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -227,7 +225,7 @@ const CourseCreator = () => {
                 className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center gap-2 hover:shadow-lg transition-all duration-300"
               >
                 <Plus className="w-5 h-5" />
-                Create New Course
+                Create New Program
               </motion.button>
 
               <motion.button
@@ -251,13 +249,13 @@ const CourseCreator = () => {
           ) : courses.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl shadow-lg">
               <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg mb-4">No courses created yet</p>
+              <p className="text-gray-600 text-lg mb-4">No programs created yet</p>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setView('create')}
                 className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-6 rounded-lg font-semibold"
               >
-                Create Your First Course
+                Create Your First Program
               </motion.button>
             </div>
           ) : (
@@ -309,10 +307,15 @@ const CourseCreator = () => {
   // Create/Edit View
   if (view === 'create' || view === 'edit') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6">
-        <div className="max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+        <PageHeader 
+          title={view === 'create' ? 'Create New Training Program' : 'Edit Training Program'} 
+          subtitle="Manage program details and curriculum" 
+          icon={BookOpen} 
+        />
+        <div className="max-w-5xl mx-auto p-6">
+          {/* Header Actions */}
+          <div className="mb-8 mt-4">
             <motion.button
               whileHover={{ scale: 1.05 }}
               onClick={() => {
@@ -321,19 +324,15 @@ const CourseCreator = () => {
               }}
               className="mb-4 text-gray-600 hover:text-gray-800 font-semibold flex items-center gap-2"
             >
-              ← Back to Courses
+              ← Back to Training Programs
             </motion.button>
-            
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              {view === 'create' ? 'Create New Course' : 'Edit Course'}
-            </h1>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-8 space-y-6">
             {/* Basic Info */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">
-                Course Title *
+                Program Title *
               </label>
               <input
                 type="text"
@@ -440,7 +439,7 @@ const CourseCreator = () => {
                   className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
                   <Save className="w-5 h-5" />
-                  Create Course
+                  Create Program
                 </motion.button>
               ) : (
                 <>

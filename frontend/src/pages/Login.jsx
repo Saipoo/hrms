@@ -40,7 +40,7 @@ const Login = () => {
           <Link to="/" className="inline-flex items-center gap-2 mb-4">
             <ScanFace className="w-12 h-12 text-primary-600" />
             <span className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-              ConnectBook
+              WorkSphere HRMS
             </span>
           </Link>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -130,9 +130,9 @@ const Login = () => {
                 onChange={handleChange}
                 className="input-field pl-10 appearance-none"
               >
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-                <option value="parent">Parent</option>
+                <option value="student">Employee</option>
+                <option value="teacher">Manager</option>
+                <option value="parent">HR</option>
                 <option value="admin">Admin</option>
               </select>
             </div>

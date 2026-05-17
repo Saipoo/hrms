@@ -89,7 +89,7 @@ const FloatingChatbot = ({ userRole }) => {
       setMessages([{
         id: Date.now(),
         type: 'bot',
-        content: `Hi! 👋 I'm your ConnectBook Assistant. How can I help you today?`,
+        content: `Hi! 👋 I'm your WorkSphere HR Assistant. How can I help you today?`,
         timestamp: new Date()
       }]);
     }
@@ -256,7 +256,7 @@ const FloatingChatbot = ({ userRole }) => {
                   <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-sm">ConnectBook Assistant</h3>
+                  <h3 className="font-semibold text-sm">WorkSphere HR Assistant</h3>
                   <p className="text-xs opacity-90">Always here to help 🤖</p>
                 </div>
               </div>

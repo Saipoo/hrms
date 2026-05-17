@@ -14,6 +14,8 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import PageHeader from '../../components/PageHeader';
+
 
 const AttendanceLogs = () => {
   const { user } = useAuth();
@@ -179,31 +181,22 @@ const AttendanceLogs = () => {
     </motion.div>
   );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-600"></div>
-      </div>
-    );
-  }
+
 
   const attendancePercentage = stats.totalLogs > 0
     ? ((stats.presentCount / stats.totalLogs) * 100).toFixed(1)
     : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-              Attendance Logs
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              View and manage student attendance records
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <PageHeader 
+        title="Employee Attendance Logs" 
+        subtitle="View and manage employee attendance records" 
+        icon={FileText} 
+      />
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header Actions */}
+        <div className="flex items-center justify-end mb-8 mt-4">
           <div className="flex gap-3">
             <button
               onClick={fetchLogs}

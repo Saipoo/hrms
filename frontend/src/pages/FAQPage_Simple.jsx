@@ -1,224 +1,164 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, Search, HelpCircle } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
 
 const FAQPage = ({ userRole = 'student' }) => {
   const [expandedFAQ, setExpandedFAQ] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Role Mapping for HRMS rebranding
+  const roleMapping = {
+    student: 'employee',
+    teacher: 'manager',
+    parent: 'hr_manager',
+    admin: 'admin'
+  };
+
+  const hrRole = roleMapping[userRole] || userRole;
+
   // Role-based colors
   const roleColors = {
-    student: 'blue',
-    teacher: 'green',
-    parent: 'purple'
+    employee: 'blue',
+    manager: 'green',
+    hr_manager: 'purple',
+    admin: 'red'
   };
-  const color = roleColors[userRole] || 'blue';
+  const color = roleColors[hrRole] || 'blue';
 
   // Simple hardcoded FAQs for each role
   const DUMMY_FAQS = {
-    student: [
+    employee: [
       {
         id: 1,
         category: 'Account and Login',
         question: 'How do I reset my password?',
-        answer: 'To reset your password:\n1. Click on "Forgot Password" on the login page\n2. Enter your registered email address\n3. Check your email for the password reset link\n4. Click the link and create a new password\n5. Login with your new password'
+        answer: 'To reset your password:\n1. Click on "Forgot Password" on the login page\n2. Enter your registered work email address\n3. Check your email for the password reset link\n4. Click the link and create a new password\n5. Login with your new password'
       },
       {
         id: 2,
         category: 'Account and Login',
-        question: 'How do I update my profile information?',
-        answer: 'To update your profile:\n1. Go to your dashboard\n2. Click on your profile icon in the top right\n3. Select "Edit Profile"\n4. Update your information (name, email, phone, etc.)\n5. Click "Save Changes"'
+        question: 'How do I update my profile photo?',
+        answer: 'To update your profile photo:\n1. Go to your dashboard\n2. Click on your profile icon in the top right or go to "Profile Settings"\n3. Click "Upload Photo"\n4. Select a professional image (max 2MB)\n5. Click "Save Changes". Your new photo will appear in the dashboard header.'
       },
       {
         id: 3,
-        category: 'Courses and Learning',
-        question: 'How do I enroll in a course?',
-        answer: 'To enroll in a course:\n1. Go to "CourseMaster" from your dashboard\n2. Browse available courses\n3. Click on the course you want to enroll in\n4. Click "Enroll Now" button\n5. Confirm your enrollment\n6. Start learning!'
+        category: 'Attendance and Work',
+        question: 'How do I mark my attendance?',
+        answer: 'WorkSphere uses biometric AI verification:\n1. Go to "Mark Attendance" from your dashboard\n2. Select your shift (Morning, Afternoon, or Remote)\n3. If at office, allow location access to verify you are within the radius\n4. Perform a quick Face Scan for biometric verification\n5. Click "Mark Attendance" once verified'
       },
       {
         id: 4,
-        category: 'Courses and Learning',
-        question: 'Where can I see my course progress?',
-        answer: 'You can view your course progress in multiple ways:\n1. On your main dashboard - see overall progress cards\n2. In CourseMaster - each course shows completion percentage\n3. In Study Planner - track your learning goals\n4. Your parents can also see your progress in their Parent Dashboard'
+        category: 'Attendance and Work',
+        question: 'Can I mark attendance from home?',
+        answer: 'Yes, if you are working remotely:\n1. Select "Remote Work" in the session selection\n2. Confirm your remote status\n3. Your attendance will be flagged for Manager review\n4. Ensure you follow company policy for remote work logging'
       },
       {
         id: 5,
-        category: 'Courses and Learning',
-        question: 'How do I download my course certificate?',
-        answer: 'To download your certificate:\n1. Complete all course modules (100% completion required)\n2. Pass any required assessments\n3. Go to "CourseMaster"\n4. Find your completed course\n5. Click "Download Certificate"\n6. Your certificate will be downloaded as a PDF'
+        category: 'Attendance and Work',
+        question: 'What is the allowed radius for office attendance?',
+        answer: 'The office radius is set by HR (typically 100-200 meters). If you are outside this range, the system will prevent biometric verification and suggest switching to Remote mode or contacting your HR Manager.'
       },
       {
         id: 6,
-        category: 'Grades and Assessments',
-        question: 'How is my work graded?',
-        answer: 'ConnectBook uses AI-powered GradeMaster for instant grading:\n1. Submit your assignments through the course portal\n2. AI analyzes your submission based on rubrics\n3. You receive instant feedback and grades\n4. Teachers can review and adjust AI grades if needed\n5. All grades are visible in your dashboard and GradeMaster section'
+        category: 'Performance and Appraisals',
+        question: 'Where can I see my performance metrics?',
+        answer: 'WorkSphere HRMS uses AI-powered metrics:\n1. Check your "Employee Dashboard" for real-time attendance rates\n2. View "Workload Analysis" to see project engagement\n3. Access detailed performance history through the "Reports" section\n4. AI-generated insights help you identify areas for professional growth'
       },
       {
         id: 7,
-        category: 'Grades and Assessments',
-        question: 'Can I view my grade history?',
-        answer: 'Yes! To view your grade history:\n1. Go to "GradeMaster" from your dashboard\n2. Select "Grade History"\n3. Filter by course, subject, or date range\n4. View detailed breakdowns of all your assessments\n5. Download grade reports for your records'
+        category: 'Performance and Appraisals',
+        question: 'How is my attendance rate calculated?',
+        answer: 'Your attendance rate is the percentage of working days you were marked "Present" (either via Face Scan or approved Remote work) over the total working days in the period.'
       },
       {
         id: 8,
-        category: 'Career Tools',
-        question: 'What is the Internship Simulator?',
-        answer: 'The Internship Simulator helps you prepare for real internships:\n1. Choose from various industry scenarios\n2. Complete realistic workplace tasks\n3. Make decisions and solve problems\n4. Receive feedback on your performance\n5. Build confidence before applying for real internships\n6. Access it from your dashboard under "Career Tools"'
+        category: 'Career Growth',
+        question: 'What is the Interview Simulator?',
+        answer: 'The Interview Simulator helps you prepare for internal promotions or project leads:\n1. Select the role type (Technical, Management, or Leadership)\n2. AI conducts a realistic interview with you\n3. Receive instant feedback on your tone, content, and confidence\n4. Improve your communication skills for professional advancement'
       },
       {
         id: 9,
-        category: 'Career Tools',
-        question: 'How does the Interview Simulator work?',
-        answer: 'The Interview Simulator prepares you for job interviews:\n1. Select interview type (technical, HR, behavioral)\n2. AI conducts a realistic interview with you\n3. Practice answering common questions\n4. Receive instant feedback on your responses\n5. Review your performance and improve\n6. Practice unlimited times until you feel confident'
+        category: 'Career Growth',
+        question: 'How does the Career Advisor work?',
+        answer: 'The AI Career Advisor analyzes your work history and interests:\n1. It recommends skill certifications based on your current role\n2. Identifies emerging industry trends (via Real-Time Updates)\n3. Suggests internal mobility paths within the company\n4. Helps you plan your long-term career roadmap'
       },
       {
         id: 10,
-        category: 'Career Tools',
-        question: 'What is the Study Planner and Career Advisor?',
-        answer: 'Two powerful tools to guide your academic journey:\n\nStudy Planner:\n- Create personalized study schedules\n- Set learning goals and track progress\n- Get AI recommendations for optimal study times\n- Balance multiple courses effectively\n\nCareer Advisor:\n- Discover career paths based on your interests\n- Get course recommendations aligned with career goals\n- Learn about industry trends and job opportunities\n- Plan your educational journey strategically'
+        category: 'Technical Support',
+        question: 'What is the Anonymous Feedback (Confessions) feature?',
+        answer: 'To ensure a healthy workplace, you can submit anonymous feedback:\n1. Go to the "Confessions" portal\n2. Submit your thoughts, concerns, or appreciation without revealing your identity\n3. HR Managers review these to improve workplace culture\n4. Identity is cryptographically protected and never shared'
       },
       {
         id: 11,
         category: 'Technical Support',
-        question: 'How do I use the AI Chatbot?',
-        answer: 'The AI Chatbot is your 24/7 assistant:\n1. Click the chat icon in the bottom right corner\n2. Type your question or concern\n3. Get instant AI-powered responses\n4. Ask about courses, assignments, deadlines, or platform features\n5. Chatbot can also help navigate the platform\n6. For complex issues, it will direct you to human support'
-      },
-      {
-        id: 12,
-        category: 'Technical Support',
-        question: 'What should I do if I encounter a technical issue?',
-        answer: 'If you experience technical problems:\n1. First, try refreshing your browser\n2. Clear your browser cache and cookies\n3. Check your internet connection\n4. Try using a different browser\n5. Contact support through the chatbot\n6. Email support@connectbook.com with details\n7. Include screenshots if possible'
+        question: 'How do I use the HR AI Chatbot?',
+        answer: 'The HR Chatbot is your 24/7 internal assistant:\n1. Click the chat icon in the bottom right corner\n2. Ask about company policies, leave balance, or platform navigation\n3. Get instant AI-powered responses based on the employee handbook\n4. For complex issues, it will escalate your query to the HR department'
       }
     ],
-    teacher: [
+    manager: [
       {
         id: 1,
-        category: 'Account and Login',
-        question: 'How do I reset my password?',
-        answer: 'To reset your password:\n1. Click on "Forgot Password" on the login page\n2. Enter your registered email address\n3. Check your email for the password reset link\n4. Click the link and create a new password\n5. Login with your new password'
+        category: 'Team Management',
+        question: 'How do I monitor my team\'s attendance?',
+        answer: 'As a Manager, your dashboard provides real-time oversight:\n1. View the "Team Overview" card for today\'s attendance status\n2. Use filters to see who is Working Remotely vs. In-Office\n3. Review "Remote Attendance" flags that require your approval\n4. Access historical logs for performance reviews'
       },
       {
         id: 2,
-        category: 'Course Management',
-        question: 'How do I create a new course?',
-        answer: 'To create a new course:\n1. Go to "CourseMaster" in your teacher dashboard\n2. Click "Create New Course"\n3. Fill in course details (name, description, category)\n4. Add course modules and content\n5. Set assessment criteria and rubrics\n6. Upload course materials (videos, PDFs, etc.)\n7. Publish when ready'
+        category: 'Team Management',
+        question: 'How do I approve Remote Work attendance?',
+        answer: 'Remote logs appear in your "Pending Reviews" section. You can click "Approve" or "Reject" based on pre-coordinated work plans. All decisions are logged for HR transparency.'
       },
       {
         id: 3,
-        category: 'Course Management',
-        question: 'Can I update course content after publishing?',
-        answer: 'Yes! You can update courses anytime:\n1. Go to your course in CourseMaster\n2. Click "Edit Course"\n3. Modify any content, modules, or assessments\n4. Students will see updated content immediately\n5. Consider notifying students of major changes\n6. Version history is maintained for your reference'
+        category: 'Project Oversight',
+        question: 'Can I assign work modules to employees?',
+        answer: 'Yes! Using the "Work Assignment" tool:\n1. Create new project modules\n2. Assign them to specific team members or departments\n3. Track progress through AI-generated engagement scores\n4. Provide feedback directly through the MentorConnect portal'
       },
       {
         id: 4,
-        category: 'Grading and Assessment',
-        question: 'How does AI grading work for my courses?',
-        answer: 'GradeMaster AI assists with grading:\n1. Students submit assignments through the platform\n2. AI analyzes submissions based on your rubrics\n3. AI provides instant grades and detailed feedback\n4. You can review AI grades in your dashboard\n5. Override or adjust grades as needed\n6. Add personal comments for students\n7. All changes are tracked and logged'
+        category: 'Mentorship',
+        question: 'What is MentorConnect for Managers?',
+        answer: 'It\'s a dedicated portal for professional development:\n1. Schedule 1-on-1 performance coaching sessions\n2. Send departmental announcements\n3. Review employee growth roadmaps\n4. Share resources for skill upscaling'
       },
       {
         id: 5,
-        category: 'Grading and Assessment',
-        question: 'Can I create custom rubrics for assignments?',
-        answer: 'Yes! Custom rubrics are fully supported:\n1. Go to any assignment in your course\n2. Click "Create Rubric"\n3. Define criteria and scoring levels\n4. Assign points for each criterion\n5. Add descriptions for each scoring level\n6. Save rubric for reuse in other assignments\n7. AI will grade based on your rubric'
-      },
-      {
-        id: 6,
-        category: 'Student Management',
-        question: 'How do I track student progress?',
-        answer: 'Monitor student progress easily:\n1. Go to your course dashboard\n2. View "Student Analytics" section\n3. See completion rates, grades, and engagement\n4. Identify students who need help\n5. Export progress reports\n6. Set up automated progress alerts\n7. Contact students directly through MentorConnect'
-      },
-      {
-        id: 7,
-        category: 'Student Management',
-        question: 'What is MentorConnect?',
-        answer: 'MentorConnect is your communication hub:\n1. Schedule one-on-one sessions with students\n2. Conduct virtual office hours\n3. Send messages and announcements\n4. Share resources and feedback\n5. Track interaction history\n6. Integrate with your calendar\n7. Record sessions for student review'
-      },
-      {
-        id: 8,
-        category: 'Attendance and Tracking',
-        question: 'How do I take attendance for virtual classes?',
-        answer: 'Taking attendance is simple:\n1. Start your virtual class session\n2. System auto-tracks student login times\n3. Manually mark attendance in the class roster\n4. Set attendance requirements for your course\n5. View attendance reports and trends\n6. Export attendance data for records\n7. Parents receive automatic attendance notifications'
-      },
-      {
-        id: 9,
-        category: 'Technical Support',
-        question: 'How do I upload and manage course materials?',
-        answer: 'Upload course materials easily:\n1. Go to your course in CourseMaster\n2. Click "Add Content"\n3. Choose content type (video, PDF, quiz, etc.)\n4. Upload files (supports multiple formats)\n5. Organize content into modules\n6. Set release schedules if needed\n7. Update or remove materials anytime'
-      },
-      {
-        id: 10,
-        category: 'Technical Support',
-        question: 'What should I do if I encounter a technical issue?',
-        answer: 'If you experience technical problems:\n1. First, try refreshing your browser\n2. Clear your browser cache and cookies\n3. Check your internet connection\n4. Try using a different browser\n5. Contact support through the teacher portal\n6. Email support@connectbook.com\n7. Priority support available for teachers'
+        category: 'Performance Reviews',
+        question: 'How does AI help with appraisals?',
+        answer: 'WorkSphere AI aggregates attendance, project engagement, and peer feedback to provide a "Performance Dashboard". This objective data assists you in conducting fair and data-driven quarterly appraisals.'
       }
     ],
-    parent: [
+    hr_manager: [
       {
         id: 1,
-        category: 'Account and Login',
-        question: 'How do I reset my password?',
-        answer: 'To reset your password:\n1. Click on "Forgot Password" on the login page\n2. Enter your registered email address\n3. Check your email for the password reset link\n4. Click the link and create a new password\n5. Login with your new password'
+        category: 'Workforce Overview',
+        question: 'How do I set the Office Geofence?',
+        answer: 'HR Managers can configure the office location:\n1. Go to "System Settings" in your HR Dashboard\n2. Search for your office address or use "My Current Location"\n3. Set the allowed radius (e.g., 100m)\n4. Save to apply the geofence globally for all employees'
       },
       {
         id: 2,
-        category: 'Monitoring Progress',
-        question: 'How can I track my child\'s academic progress?',
-        answer: 'Your Parent Dashboard provides comprehensive tracking:\n1. Login to your parent dashboard\n2. View real-time grade updates\n3. See course completion percentages\n4. Track attendance records\n5. Review assignment submissions\n6. Monitor study time and engagement\n7. Receive automated progress reports weekly'
+        category: 'Workforce Overview',
+        question: 'How do I export attendance reports for payroll?',
+        answer: 'To export data:\n1. Go to "Attendance Logs"\n2. Apply date filters (e.g., current month)\n3. Click "Export CSV" or "Export PDF"\n4. The report includes Employee ID, Total Present Days, Remote Days, and Absences'
       },
       {
         id: 3,
-        category: 'Monitoring Progress',
-        question: 'What notifications will I receive?',
-        answer: 'You\'ll receive important notifications about:\n1. Grade updates and report cards\n2. Assignment submissions and due dates\n3. Attendance alerts and absences\n4. Course enrollments and completions\n5. Teacher messages and announcements\n6. Upcoming parent-teacher meetings\n7. Platform updates and new features'
+        category: 'Employee Wellness',
+        question: 'How do I moderate Anonymous Feedback?',
+        answer: 'The "Confessions Portal" allows you to view aggregate sentiment:\n1. Review anonymous submissions to gauge office morale\n2. Flag urgent concerns for executive review\n3. Respond to "Global" feedback items with departmental announcements\n4. Use AI sentiment analysis to track workplace satisfaction trends'
       },
       {
         id: 4,
-        category: 'Communication',
-        question: 'How do I communicate with my child\'s teachers?',
-        answer: 'Connect with teachers easily:\n1. Go to "Teacher Communication" in your dashboard\n2. View list of your child\'s teachers\n3. Send direct messages\n4. Schedule parent-teacher meetings\n5. View teacher announcements\n6. Receive responses within 24-48 hours\n7. All communication is tracked and archived'
-      },
-      {
-        id: 5,
-        category: 'Communication',
-        question: 'Can I schedule meetings with teachers?',
-        answer: 'Yes! Schedule meetings easily:\n1. Go to "Teacher Communication"\n2. Select the teacher you want to meet\n3. View their available time slots\n4. Choose a convenient time\n5. Add meeting agenda/topics\n6. Receive confirmation and reminders\n7. Join virtual meetings through the platform'
-      },
-      {
-        id: 6,
-        category: 'Attendance and Reports',
-        question: 'How do I view attendance records?',
-        answer: 'Access attendance information:\n1. Go to "Attendance Tracking" in your dashboard\n2. View daily, weekly, or monthly attendance\n3. See detailed login/logout times\n4. Check class participation rates\n5. Download attendance reports\n6. Receive alerts for absences\n7. View attendance trends and patterns'
-      },
-      {
-        id: 7,
-        category: 'Attendance and Reports',
-        question: 'Can I download my child\'s progress reports?',
-        answer: 'Yes! Download comprehensive reports:\n1. Go to "Reports" section in dashboard\n2. Select report type (grades, attendance, progress)\n3. Choose date range\n4. Click "Generate Report"\n5. Download as PDF or Excel\n6. Reports include detailed analytics\n7. Share reports with other family members'
-      },
-      {
-        id: 8,
-        category: 'Account Management',
-        question: 'How do I add multiple children to my account?',
-        answer: 'Manage multiple children easily:\n1. Go to "Account Settings"\n2. Click "Add Child"\n3. Enter child\'s student ID or email\n4. Send connection request\n5. Wait for school/student approval\n6. Switch between children in your dashboard\n7. View combined or individual reports'
-      },
-      {
-        id: 9,
-        category: 'Account Management',
-        question: 'Can I control what my child accesses?',
-        answer: 'Yes! Parental controls include:\n1. View all courses your child is enrolled in\n2. See assignment due dates and priorities\n3. Monitor login times and duration\n4. Review AI chatbot conversations (if enabled)\n5. Set study time reminders\n6. Receive alerts for specific activities\n7. Note: Cannot restrict teacher-assigned content'
-      },
-      {
-        id: 10,
-        category: 'Technical Support',
-        question: 'What should I do if I encounter a technical issue?',
-        answer: 'If you experience technical problems:\n1. First, try refreshing your browser\n2. Clear your browser cache and cookies\n3. Check your internet connection\n4. Try using a different browser\n5. Contact support through the parent portal\n6. Email support@connectbook.com\n7. Include your child\'s student ID when contacting support'
+        category: 'System Security',
+        question: 'What should I do if an employee cannot register their face?',
+        answer: 'If biometric registration fails:\n1. Ensure the employee is using a high-quality camera\n2. Check for sufficient lighting\n3. If issues persist, you can "Reset Biometric Profile" in the Employee Management section, allowing them to try registration again.'
       }
     ]
   };
 
   // Get FAQs for current role
-  const allFAQs = DUMMY_FAQS[userRole] || [];
+  const allFAQs = DUMMY_FAQS[hrRole] || [];
 
   // Extract unique categories
   const categories = ['all', ...new Set(allFAQs.map(faq => faq.category))];
@@ -237,24 +177,12 @@ const FAQPage = ({ userRole = 'student' }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="flex items-center justify-center mb-4">
-            <HelpCircle className={`text-${color}-600 mr-3`} size={48} />
-            <h1 className={`text-4xl font-bold text-${color}-600`}>
-              Frequently Asked Questions
-            </h1>
-          </div>
-          <p className="text-xl text-gray-600">
-            Find answers to common questions about ConnectBook
-          </p>
-        </motion.div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
+      <PageHeader 
+        title="Frequently Asked Questions" 
+        subtitle="Find answers to common questions about WorkSphere HRMS platform features and policies"
+        icon={HelpCircle}
+      />
 
         {/* Search Bar */}
         <motion.div
@@ -358,7 +286,7 @@ const FAQPage = ({ userRole = 'student' }) => {
                       className="overflow-hidden"
                     >
                       <div className={`px-6 pb-6 pt-2 border-t border-gray-100`}>
-                        <div className={`bg-${color}-50 rounded-lg p-4`}>
+                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                           <p className="text-gray-700 whitespace-pre-line leading-relaxed">
                             {faq.answer}
                           </p>
@@ -370,7 +298,6 @@ const FAQPage = ({ userRole = 'student' }) => {
               </motion.div>
             ))
           )}
-        </div>
       </div>
     </div>
   );

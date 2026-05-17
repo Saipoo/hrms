@@ -1,15 +1,15 @@
 import mongoose from 'mongoose';
 
 const attendanceLogSchema = new mongoose.Schema({
-  usn: {
+  empid: {
     type: String,
-    required: [true, 'USN is required'],
+    required: [true, 'Employee ID is required'],
     uppercase: true,
     trim: true
   },
   name: {
     type: String,
-    required: [true, 'Student name is required'],
+    required: [true, 'Employee name is required'],
     trim: true
   },
   subject: {
@@ -28,7 +28,7 @@ const attendanceLogSchema = new mongoose.Schema({
   mode: {
     type: String,
     required: [true, 'Mode is required'],
-    enum: ['Face Recognition', 'Manual'],
+    enum: ['Face Recognition', 'Biometric', 'Remote', 'Manual'],
     default: 'Face Recognition'
   },
   status: {
@@ -50,9 +50,28 @@ const attendanceLogSchema = new mongoose.Schema({
     trim: true,
     uppercase: true
   },
+  // Geolocation fields for HRMS attendance
+  latitude: {
+    type: Number,
+    default: null
+  },
+  longitude: {
+    type: Number,
+    default: null
+  },
+  locationVerified: {
+    type: Boolean,
+    default: false
+  },
+  // Session type for HRMS: 'check-in' | 'check-out' | 'remote'
+  sessionType: {
+    type: String,
+    enum: ['check-in', 'check-out', 'remote', null],
+    default: null
+  },
   markedBy: {
     type: String,
-    default: 'Student'
+    default: 'Employee'
   },
   createdAt: {
     type: Date,
@@ -63,7 +82,7 @@ const attendanceLogSchema = new mongoose.Schema({
 });
 
 // Indexes for faster queries
-attendanceLogSchema.index({ usn: 1, date: -1 });
+attendanceLogSchema.index({ empid: 1, date: -1 });
 attendanceLogSchema.index({ subject: 1, date: -1 });
 
 export default mongoose.model('AttendanceLog', attendanceLogSchema);

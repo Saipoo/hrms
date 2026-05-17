@@ -18,10 +18,15 @@ import {
   Users
 } from 'lucide-react';
 import StudentMeetingRoom from '../../components/meetings/StudentMeetingRoom';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
+import { useAuth } from '../../context/AuthContext';
+
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const StudentLectures = () => {
+const EmployeeLectures = () => {
+  const { user } = useAuth();
   const [lectures, setLectures] = useState([]);
   const [liveLectures, setLiveLectures] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,17 +40,17 @@ const StudentLectures = () => {
   useEffect(() => {
     fetchLectures();
     fetchLiveLectures();
-    fetchStudentInfo();
+    fetchEmployeeInfo();
     
     // Poll for live lectures every 30 seconds
     const interval = setInterval(fetchLiveLectures, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const fetchStudentInfo = () => {
+  const fetchEmployeeInfo = () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     setStudentInfo({
-      usn: user.usn,
+      empid: user.empid,
       name: user.name,
       email: user.email
     });
@@ -72,7 +77,7 @@ const StudentLectures = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${API_URL}/api/lectures/student`,
+        `${API_URL}/api/lectures/employee`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -90,7 +95,7 @@ const StudentLectures = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${API_URL}/api/lectures/student/revision-mode`,
+        `${API_URL}/api/lectures/employee/revision-mode`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -160,7 +165,7 @@ const StudentLectures = () => {
       const content = `
 ${lecture.title}
 ${lecture.subject} - ${lecture.topic || ''}
-Teacher: ${lecture.teacherName}
+Manager: ${lecture.teacherName}
 Date: ${new Date(lecture.publishedAt).toLocaleDateString()}
 
 ========================================
@@ -219,19 +224,13 @@ ${idx + 1}. ${q.question}
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <BookOpen className="w-8 h-8 text-indigo-600" />
-            Lecture Notes & Recordings
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Access all your lecture materials, notes, and revision resources
-          </p>
-        </div>
-
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Company Policies"
+    >
+      <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow-sm mb-6">
           <div className="flex border-b">
@@ -259,7 +258,7 @@ ${idx + 1}. ${q.question}
             >
               <div className="flex items-center justify-center gap-2">
                 <Video className="w-5 h-5" />
-                All Lectures ({lectures.length})
+                All Company Documents ({lectures.length})
               </div>
             </button>
 
@@ -350,8 +349,8 @@ ${idx + 1}. ${q.question}
             {lectures.length === 0 ? (
               <div className="bg-white rounded-lg shadow-sm p-12 text-center text-gray-500">
                 <Video className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg mb-2">No lectures available yet</p>
-                <p className="text-sm">Your teachers will publish lectures here</p>
+                <p className="text-lg mb-2">No documents available yet</p>
+                <p className="text-sm">Your managers will publish company documents here</p>
               </div>
             ) : (
               lectures.map((lecture) => (
@@ -449,7 +448,7 @@ ${idx + 1}. ${q.question}
                   <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-600">Total Lectures</p>
+                        <p className="text-sm text-gray-600">Total Documents</p>
                         <p className="text-3xl font-bold text-indigo-600">{revisionData.totalLectures}</p>
                       </div>
                       <Video className="w-10 h-10 text-indigo-600" />
@@ -659,14 +658,15 @@ ${idx + 1}. ${q.question}
 
       {/* Meeting Room */}
       {inMeeting && selectedLecture && studentInfo && (
-        <StudentMeetingRoom
+        <EmployeeMeetingRoom
           lecture={selectedLecture}
           studentInfo={studentInfo}
           onLeaveMeeting={handleLeaveMeeting}
         />
       )}
     </div>
+    </DashboardLayout>
   );
 };
 
-export default StudentLectures;
+export default EmployeeLectures;

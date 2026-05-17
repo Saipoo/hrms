@@ -1,57 +1,33 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Helper function to clean JSON strings
-function cleanJsonString(jsonStr) {
-  return jsonStr
-    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
-    .replace(/\\n/g, ' ') // Replace escaped newlines with spaces
-    .replace(/\\r/g, '') // Remove escaped carriage returns
-    .replace(/\\t/g, ' '); // Replace escaped tabs with spaces
-}
+import AIService from './AIService.js';
 
 class CareerAdvisorAIService {
-  constructor() {
-    this.model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-  }
-
   /**
-   * Analyze student profile and recommend career paths
+   * Analyze employee profile and recommend career growth paths
    */
-  async analyzeCareerPaths(studentData) {
+  async analyzeCareerPaths(employeeData) {
     try {
       const {
-        academicPerformance,
-        completedCourses = [],
-        internshipExperience = [],
-        interviewPerformance = {},
+        performanceKpis,
+        completedTraining = [],
+        experience = [],
         interests = [],
         currentSkills = []
-      } = studentData || {};
+      } = employeeData || {};
 
       const prompt = `
-You are an AI career counselor. Analyze this student's profile and recommend top 5 suitable career paths.
+You are an AI Executive Career Coach. Analyze this employee's profile and recommend top 5 internal growth or professional career paths.
 
-Student Profile:
-Academic Performance:
-- Overall GPA: ${academicPerformance?.overallGPA || 'N/A'}
-- Strong Subjects: ${academicPerformance?.strongSubjects?.join(', ') || 'N/A'}
-- Weak Subjects: ${academicPerformance?.weakSubjects?.join(', ') || 'N/A'}
+Employee Profile:
+Performance KPIs:
+- Overall Rating: ${performanceKpis?.overallRating || 'N/A'}
+- Strengths: ${performanceKpis?.strengths?.join(', ') || 'N/A'}
+- Improvement Areas: ${performanceKpis?.improvementAreas?.join(', ') || 'N/A'}
 
-Completed Courses:
-${(completedCourses || []).map(c => `- ${c.title} (${c.domain})`).join('\n') || 'None'}
+Completed Training:
+${(completedTraining || []).map(t => `- ${t.title} (${t.category})`).join('\n') || 'None'}
 
-Internship Experience:
-${(internshipExperience || []).map(i => `- ${i.title} - ${i.domain} (Rating: ${i.rating}/5)`).join('\n') || 'None'}
-
-Interview Performance:
-- Average Score: ${interviewPerformance?.averageScore || 'N/A'}%
-- Strong Areas: ${interviewPerformance?.strongAreas?.join(', ') || 'N/A'}
-- Improvement Areas: ${interviewPerformance?.improvementAreas?.join(', ') || 'N/A'}
+Professional Experience:
+${(experience || []).map(e => `- ${e.title} at ${e.company} (${e.duration})`).join('\n') || 'None'}
 
 Interests:
 ${(interests || []).map(i => `- ${i.area} (${i.level} interest)`).join('\n') || 'Not specified'}
@@ -59,72 +35,21 @@ ${(interests || []).map(i => `- ${i.area} (${i.level} interest)`).join('\n') || 
 Current Skills:
 ${(currentSkills || []).map(s => `- ${s.name} (${s.level})`).join('\n') || 'None listed'}
 
-Recommend 5 career paths with match score (0-100) based on their profile. Include:
-1. Career title
-2. Description
-3. Required skills
-4. Average salary range (in INR per annum)
-5. Top hiring companies in India
-6. Match reasoning
+Recommend 5 career paths with match score (0-100). Include title, description, required skills, average salary range (INR), top companies/departments, and reasoning.
 
-Return JSON:
-[
-  {
-    "path": {
-      "title": "Software Development Engineer",
-      "description": "Design, develop, and maintain software applications...",
-      "category": "software",
-      "requiredSkills": ["Java", "Data Structures", "Algorithms", "System Design"],
-      "optionalSkills": ["Cloud", "DevOps", "Microservices"],
-      "averageSalary": {
-        "min": 600000,
-        "max": 1500000,
-        "currency": "INR"
-      },
-      "topCompanies": ["Google", "Microsoft", "Amazon", "Flipkart", "PayTM"],
-      "growthRate": "15% annually",
-      "workEnvironment": "Office/Remote/Hybrid",
-      "educationRequired": "B.Tech/B.E. in Computer Science or related field",
-      "certifications": ["AWS Certified Developer", "Oracle Java Certification"]
-    },
-    "matchScore": 85,
-    "reasoning": "Strong performance in programming courses, completed Java internship, good problem-solving skills evident from interview performance"
-  }
-]
-
-IMPORTANT: Return ONLY the JSON array, no explanations.
+Return JSON array of objects with "path" and "matchScore" and "reasoning".
 `;
 
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      const jsonMatch = text.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) {
-        throw new Error('Failed to parse career paths from AI response');
-      }
-      
-      const recommendations = JSON.parse(cleanJsonString(jsonMatch[0]));
-      
-      // Add generation timestamp
-      const enrichedRecommendations = recommendations.map(rec => ({
-        ...rec,
-        generatedAt: new Date()
-      }));
+      const recommendations = await AIService.generateContent(prompt);
       
       return {
         success: true,
-        recommendations: enrichedRecommendations,
+        recommendations: (recommendations || []).map(rec => ({ ...rec, generatedAt: new Date() })),
         analyzedAt: new Date()
       };
-      
     } catch (error) {
       console.error('Error analyzing career paths:', error);
-      return {
-        success: false,
-        message: 'Failed to analyze career paths',
-        error: error.message
-      };
+      return { success: false, message: 'Failed to analyze career paths' };
     }
   }
 
@@ -133,451 +58,153 @@ IMPORTANT: Return ONLY the JSON array, no explanations.
    */
   async analyzeSkillGaps(currentProfile, targetCareerPath) {
     try {
-      const { currentSkills = [], completedCourses = [] } = currentProfile || {};
-      const { requiredSkills = [], optionalSkills = [], title = 'Target Career' } = targetCareerPath || {};
+      const { currentSkills = [], completedTraining = [] } = currentProfile || {};
+      const { requiredSkills = [], title = 'Target Career' } = targetCareerPath || {};
 
       const prompt = `
-You are a career development advisor. Analyze skill gaps for a student targeting "${title}".
+Analyze skill gaps for an employee targeting "${title}".
+Current Skills: ${(currentSkills || []).map(s => s.name).join(', ')}
+Target Skills: ${(requiredSkills || []).join(', ')}
 
-Current Skills:
-${(currentSkills || []).map(s => `- ${s.name} (${s.level})`).join('\n') || 'None'}
-
-Completed Courses:
-${(completedCourses || []).map(c => `- ${c.title}`).join('\n') || 'None'}
-
-Target Career Required Skills:
-${(requiredSkills || []).join(', ') || 'N/A'}
-
-Target Career Optional Skills:
-${(optionalSkills || []).join(', ') || 'N/A'}
-
-Identify:
-1. Skills the student MUST learn (required but missing)
-2. Skills they should improve (have but low level)
-3. Optional skills that would give an advantage
-4. Suggest learning resources for each skill gap
-
-Return JSON:
-[
-  {
-    "skill": "Skill Name",
-    "category": "technical",
-    "importance": "required",
-    "currentLevel": "none",
-    "targetLevel": "intermediate",
-    "resources": [
-      {
-        "type": "course",
-        "title": "Resource Title",
-        "platform": "Platform Name",
-        "url": "https://example.com"
-      }
-    ],
-    "estimatedTimeToLearn": "2-3 months",
-    "priority": 1
-  }
-]
-
-Categories: "technical", "soft-skill", "tool", "language", "framework", "domain-knowledge"
-Importance: "required", "recommended", "optional"
-Current Level: "none", "beginner", "intermediate", "advanced"
-Target Level: "beginner", "intermediate", "advanced", "expert"
-Resource Types: "course", "book", "project", "certification", "practice"
-
-Order by priority (1 = highest).
-IMPORTANT: Return ONLY the JSON array, no explanations.
+Identify missing skills, priority, and suggested corporate training resources.
+Return JSON array of objects.
 `;
 
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      const skillGaps = await AIService.generateContent(prompt);
       
-      const jsonMatch = text.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) {
-        throw new Error('Failed to parse skill gaps from AI response');
-      }
-      
-      const skillGaps = JSON.parse(cleanJsonString(jsonMatch[0]));
-      
-      return {
-        success: true,
-        skillGaps,
-        analyzedAt: new Date()
-      };
-      
+      return { success: true, skillGaps, analyzedAt: new Date() };
     } catch (error) {
       console.error('Error analyzing skill gaps:', error);
-      return {
-        success: false,
-        message: 'Failed to analyze skill gaps',
-        error: error.message
-      };
+      return { success: false, message: 'Failed to analyze skill gaps' };
     }
   }
 
   /**
-   * Generate AI-powered resume
+   * Generate/Edit AI-powered resume
    */
-  async generateResume(studentProfile) {
+  async generateResume(employeeProfile) {
     try {
-      const {
-        personalInfo,
-        academicPerformance,
-        completedCourses,
-        internshipExperience,
-        projects,
-        currentSkills = [],
-        certifications = [],
-        targetCareerPath = 'Software Developer'
-      } = studentProfile || {};
-
       const prompt = `
-You are a professional resume writer. Create an ATS-friendly resume for this student targeting "${targetCareerPath}".
+Create a professional, ATS-optimized executive resume for:
+${JSON.stringify(employeeProfile)}
 
-Personal Information:
-- Name: ${personalInfo?.name || 'Student Name'}
-- Email: ${personalInfo?.email || 'student@example.com'}
-- Phone: ${personalInfo?.phone || 'N/A'}
-
-Education:
-- Degree: ${personalInfo?.degree || 'Bachelor of Engineering'}
-- College: ${personalInfo?.college || 'Engineering College'}
-- GPA: ${academicPerformance?.overallGPA || 'N/A'}
-- Strong Subjects: ${academicPerformance?.strongSubjects?.join(', ') || 'N/A'}
-
-Courses Completed:
-${(completedCourses || []).map(c => `- ${c.title} (${c.domain}) - Grade: ${c.grade}`).join('\n') || 'None'}
-
-Internship Experience:
-${(internshipExperience || []).map(i => `- ${i.title} at ${i.company || 'N/A'} - ${i.duration || 'N/A'}`).join('\n') || 'None'}
-
-Projects:
-${(projects || []).map(p => `- ${p.title}: ${p.description} (Tech: ${p.technologies?.join(', ')})`).join('\n') || 'None'}
-
-Skills:
-${(currentSkills || []).map(s => s.name).join(', ') || 'N/A'}
-
-Certifications:
-${(certifications || []).map(c => `- ${c.name} by ${c.issuer}`).join('\n') || 'None'}
-
-Generate:
-1. Professional summary (2-3 sentences highlighting strengths and career goal)
-2. Structured experience descriptions
-3. Project descriptions with impact
-4. Skills categorization
-
-Return JSON:
-{
-  "summary": "Results-driven Computer Science student with strong foundation in...",
-  "sections": {
-    "education": [
-      {
-        "degree": "B.Tech in Computer Science",
-        "institution": "College Name",
-        "year": "2021-2025",
-        "grade": "8.5 GPA"
-      }
-    ],
-    "experience": [
-      {
-        "title": "Software Development Intern",
-        "company": "Company Name",
-        "duration": "Jun 2024 - Aug 2024",
-        "description": "• Developed RESTful APIs using Node.js\n• Improved performance by 30%\n• Collaborated with team of 5 developers",
-        "source": "internship-simulator"
-      }
-    ],
-    "projects": [
-      {
-        "title": "Project Name",
-        "description": "• Built full-stack web app using MERN\n• Implemented JWT authentication\n• Deployed on AWS",
-        "technologies": ["React", "Node.js", "MongoDB"],
-        "url": "https://github.com/...",
-        "source": "personal"
-      }
-    ],
-    "certifications": [
-      {
-        "name": "AWS Certified Developer",
-        "issuer": "Amazon Web Services",
-        "date": "2024-05-15",
-        "url": "https://...",
-        "source": "external"
-      }
-    ],
-    "skills": ["JavaScript", "Python", "React", "Node.js", "MongoDB", "AWS"]
-  },
-  "tips": ["Tip 1 for improving resume", "Tip 2", "Tip 3"]
-}
-
-IMPORTANT: Return ONLY the JSON object, no explanations.
+Include professional summary, experience with impact metrics, project descriptions, and skill categorization.
+Return JSON object with "summary", "sections" (education, experience, projects, certifications, skills), and "tips".
 `;
 
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('Failed to parse resume from AI response');
-      }
-      
-      const resume = JSON.parse(cleanJsonString(jsonMatch[0]));
+      const resume = await AIService.generateContent(prompt);
       
       return {
         success: true,
-        resume: {
-          ...resume,
-          aiGenerated: true,
-          lastGenerated: new Date()
-        },
+        resume: { ...resume, aiGenerated: true, lastGenerated: new Date() },
         generatedAt: new Date()
       };
-      
     } catch (error) {
       console.error('Error generating resume:', error);
-      return {
-        success: false,
-        message: 'Failed to generate resume',
-        error: error.message
-      };
+      return { success: false, message: 'Failed to generate resume' };
     }
   }
 
   /**
-   * Calculate career readiness score with detailed breakdown
+   * Optimize existing resume based on job description
    */
-  async calculateReadinessScore(studentProfile, targetCareerPath) {
+  async optimizeResume(resumeContent, jobDescription) {
     try {
-      const {
-        currentSkills = [],
-        completedCourses = [],
-        internshipExperience = [],
-        interviewPerformance = {},
-        projects = []
-      } = studentProfile || {};
-
-      const { requiredSkills = [], optionalSkills = [], title = 'Target Career' } = targetCareerPath || {};
-
       const prompt = `
-You are a career readiness assessor. Evaluate this student's readiness for "${title}".
+Optimize this resume for the following job description:
+RESUME: ${JSON.stringify(resumeContent)}
+JOB DESCRIPTION: ${jobDescription}
 
-Current Profile:
-- Skills: ${(currentSkills || []).map(s => `${s.name} (${s.level})`).join(', ') || 'None'}
-- Completed Courses: ${(completedCourses || []).length || 0}
-- Internship Experience: ${(internshipExperience || []).length || 0}
-- Projects: ${(projects || []).length || 0}
-- Interview Average Score: ${interviewPerformance?.averageScore || 0}%
+Provide:
+1. ATS Score (0-100)
+2. Missing keywords
+3. Content improvements
+4. Optimized resume content
 
-Required Skills for Career:
-${(requiredSkills || []).join(', ') || 'N/A'}
-
-Optional Skills:
-${(optionalSkills || []).join(', ') || 'N/A'}
-
-Evaluate readiness in these categories (0-100):
-1. Technical Skills (40% weight) - How many required skills they have and at what level
-2. Soft Skills (20% weight) - Based on interview performance
-3. Experience (40% weight) - Internships, projects, courses
-
-Return JSON:
-{
-  "overall": 72,
-  "technical": 65,
-  "softSkills": 80,
-  "experience": 75,
-  "breakdown": {
-    "strengths": ["Strength 1", "Strength 2", "Strength 3"],
-    "weaknesses": ["Area to improve 1", "Area to improve 2"],
-    "nextSteps": ["Action 1", "Action 2", "Action 3"]
-  },
-  "timeline": "Expected job-ready in 4-6 months with focused skill development",
-  "confidence": "high"
-}
-
-Confidence levels: "low" (<50), "medium" (50-70), "high" (70-85), "very-high" (85+)
-IMPORTANT: Return ONLY the JSON object, no explanations.
+Return JSON: { "atsScore": number, "suggestions": { "keywords": [], "content": [] }, "optimizedResume": {} }
 `;
 
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('Failed to parse readiness score from AI response');
-      }
-      
-      const readinessScore = JSON.parse(cleanJsonString(jsonMatch[0]));
-      
-      return {
-        success: true,
-        readinessScore: {
-          ...readinessScore,
-          lastUpdated: new Date()
-        },
-        analyzedAt: new Date()
-      };
-      
+      const results = await AIService.generateContent(prompt);
+      return { success: true, data: results };
+    } catch (error) {
+      console.error('Error optimizing resume:', error);
+      return { success: false, message: 'Failed to optimize resume' };
+    }
+  }
+
+  /**
+   * Parse existing resume text/content into structured data
+   */
+  async parseResume(fileContent, fileType) {
+    try {
+      const prompt = `
+Parse this ${fileType} resume content into a structured JSON format.
+CONTENT: ${fileContent}
+
+Extract:
+- Professional Summary
+- Education (array of objects)
+- Experience (array of objects)
+- Projects (array of objects)
+- Technical Skills (array)
+- Certifications (array)
+
+Return JSON object: { "summary": "", "education": [], "experience": [], "projects": [], "skills": { "technical": [] }, "certifications": [] }
+`;
+
+      const parsedData = await AIService.generateContent(prompt);
+      return { success: true, data: parsedData };
+    } catch (error) {
+      console.error('Error parsing resume:', error);
+      return { success: false, message: 'Failed to parse resume content' };
+    }
+  }
+
+  /**
+   * Calculate career readiness score
+   */
+  async calculateReadinessScore(profile, targetPath) {
+    try {
+      const prompt = `
+Calculate a "Professional Readiness Score" (0-100) for this employee targeting "${targetPath}".
+Profile: ${JSON.stringify(profile)}
+
+Return JSON: { "score": number, "breakdown": { "skills": number, "experience": number, "training": number }, "recommendations": [] }
+`;
+      return await AIService.generateContent(prompt);
     } catch (error) {
       console.error('Error calculating readiness score:', error);
-      return {
-        success: false,
-        message: 'Failed to calculate readiness score',
-        error: error.message
-      };
+      return { score: 50, breakdown: {}, recommendations: [] };
     }
   }
 
   /**
-   * Analyze career quiz results and provide insights
+   * Generate career roadmap
    */
-  async analyzeQuizResults(quizAnswers, quizType) {
+  async generateCareerRoadmap(profile, targetPath) {
     try {
       const prompt = `
-You are a career psychologist. Analyze these ${quizType} quiz results and provide insights.
+Generate a 12-month professional career roadmap for an employee transitioning to "${targetPath}".
+Profile: ${JSON.stringify(profile)}
 
-Quiz Answers:
-${quizAnswers.map((a, i) => `Q${i+1}. ${a.question}\nAnswer: ${a.answer}`).join('\n\n')}
-
-Based on the answers, determine:
-1. Primary personality/skill type
-2. Secondary type
-3. Key strengths
-4. Areas for development
-5. Career recommendations based on this profile
-
-Return JSON:
-{
-  "primaryType": "Analytical Thinker",
-  "secondaryType": "Problem Solver",
-  "strengths": ["Strength 1", "Strength 2", "Strength 3", "Strength 4"],
-  "weaknesses": ["Area 1", "Area 2"],
-  "recommendations": [
-    "Career path 1 - Reasoning why suitable",
-    "Career path 2 - Reasoning why suitable",
-    "Career path 3 - Reasoning why suitable"
-  ],
-  "developmentTips": ["Tip 1", "Tip 2", "Tip 3"],
-  "score": 78,
-  "interpretation": "Detailed interpretation of the results"
-}
-
-IMPORTANT: Return ONLY the JSON object, no explanations.
+Return JSON array of 4 quarters, each with "quarter", "focus", "milestones" (array of strings).
 `;
-
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('Failed to parse quiz analysis from AI response');
-      }
-      
-      const analysis = JSON.parse(cleanJsonString(jsonMatch[0]));
-      
-      return {
-        success: true,
-        results: analysis,
-        analyzedAt: new Date()
-      };
-      
+      return await AIService.generateContent(prompt);
     } catch (error) {
-      console.error('Error analyzing quiz results:', error);
-      return {
-        success: false,
-        message: 'Failed to analyze quiz results',
-        error: error.message
-      };
-    }
-  }
-
-  /**
-   * Generate personalized career development roadmap
-   */
-  async generateCareerRoadmap(studentProfile, targetCareerPath, timeframe = 6) {
-    try {
-      const { currentSkills = [], skillGaps = [] } = studentProfile || {};
-      const { title = 'Target Career' } = targetCareerPath || {};
-
-      const prompt = `
-You are a career development coach. Create a ${timeframe}-month roadmap for achieving career goal: "${title}".
-
-Current Skills:
-${(currentSkills || []).map(s => `- ${s.name} (${s.level})`).join('\n') || 'None'}
-
-Skills to Develop:
-${(skillGaps || []).map(sg => `- ${sg.skill} (Priority: ${sg.importance})`).join('\n') || 'None'}
-
-Create a month-by-month roadmap with:
-1. Specific skills to learn each month
-2. Milestones to achieve
-3. Resources to use
-4. Expected outcomes
-
-Return JSON:
-{
-  "totalDuration": "${timeframe} months",
-  "phases": [
-    {
-      "month": 1,
-      "title": "Foundation Building",
-      "goals": ["Goal 1", "Goal 2"],
-      "skills": ["Skill 1", "Skill 2"],
-      "activities": [
-        {
-          "activity": "Complete X course",
-          "hours": 20,
-          "outcome": "Expected outcome"
-        }
-      ],
-      "milestone": "Milestone to achieve this month"
-    }
-  ],
-  "finalOutcome": "Job-ready for ${targetCareerPath.title} position",
-  "estimatedEffort": "15-20 hours per week"
-}
-
-IMPORTANT: Return ONLY the JSON object, no explanations.
-`;
-
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('Failed to parse career roadmap from AI response');
-      }
-      
-      const roadmap = JSON.parse(cleanJsonString(jsonMatch[0]));
-      
-      return {
-        success: true,
-        roadmap,
-        generatedAt: new Date()
-      };
-      
-    } catch (error) {
-      console.error('Error generating career roadmap:', error);
-      return {
-        success: false,
-        message: 'Failed to generate roadmap',
-        error: error.message
-      };
+      console.error('Error generating roadmap:', error);
+      return [];
     }
   }
 }
 
 const careerAdvisorAIService = new CareerAdvisorAIService();
-
-// Export both default and named exports for convenience
 export default careerAdvisorAIService;
 
-export const analyzeCareerPaths = (studentData) => careerAdvisorAIService.analyzeCareerPaths(studentData);
-export const analyzeSkillGaps = (currentProfile, targetCareerPath) => careerAdvisorAIService.analyzeSkillGaps(currentProfile, targetCareerPath);
-export const generateResume = (studentProfile) => careerAdvisorAIService.generateResume(studentProfile);
-export const calculateReadinessScore = (studentProfile, targetCareerPath) => careerAdvisorAIService.calculateReadinessScore(studentProfile, targetCareerPath);
-export const analyzeQuizResults = (quizAnswers, quizType) => careerAdvisorAIService.analyzeQuizResults(quizAnswers, quizType);
-export const generateCareerRoadmap = (studentProfile, targetCareerPath, timeframe) => careerAdvisorAIService.generateCareerRoadmap(studentProfile, targetCareerPath, timeframe);
+export const analyzeCareerPaths = (data) => careerAdvisorAIService.analyzeCareerPaths(data);
+export const analyzeSkillGaps = (profile, path) => careerAdvisorAIService.analyzeSkillGaps(profile, path);
+export const generateResume = (profile) => careerAdvisorAIService.generateResume(profile);
+export const optimizeResume = (resume, jd) => careerAdvisorAIService.optimizeResume(resume, jd);
+export const parseResume = (content, type) => careerAdvisorAIService.parseResume(content, type);
+export const calculateReadinessScore = (profile, path) => careerAdvisorAIService.calculateReadinessScore(profile, path);
+export const generateCareerRoadmap = (profile, path) => careerAdvisorAIService.generateCareerRoadmap(profile, path);
+export const analyzeQuizResults = (data) => careerAdvisorAIService.analyzeCareerPaths(data); // Rebranded alias

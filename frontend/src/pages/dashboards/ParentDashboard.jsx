@@ -27,7 +27,7 @@ import api from '../../services/api';
 import { initializeSocket, getSocket } from '../../services/socket';
 import toast from 'react-hot-toast';
 
-const ParentDashboard = () => {
+const HRDashboard = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [studentInfo, setStudentInfo] = useState(null);
@@ -64,7 +64,7 @@ const ParentDashboard = () => {
 
     if (socket) {
       socket.on('attendanceMarked', (data) => {
-        if (data.usn === user.linkedStudentUSN) {
+        if (data.usn === user.linkedEmpId) {
           const message = `${data.name} marked ${data.status.toLowerCase()} for ${data.subject}`;
           toast.success(message, { duration: 5000 });
           setNotifications(prev => [{
@@ -83,14 +83,14 @@ const ParentDashboard = () => {
       setLoading(true);
 
       // Check if user has linkedStudentUSN
-      if (!user.linkedStudentUSN) {
-        toast.error('No student linked to this parent account');
+      if (!user.linkedEmpId) {
+        toast.error('No employee linked to this HR account');
         setLoading(false);
         return;
       }
 
-      // Fetch student attendance info
-      const studentResponse = await api.get(`/attendance/student/${user.linkedStudentUSN}`);
+      // Fetch employee attendance info
+      const studentResponse = await api.get(`/attendance/employee/${user.linkedEmpId}`);
       console.log('📊 Student attendance response:', studentResponse.data);
       console.log('📊 Attendance logs count:', studentResponse.data?.data?.length || 0);
       console.log('📊 First few logs:', studentResponse.data?.data?.slice(0, 3));
@@ -103,7 +103,7 @@ const ParentDashboard = () => {
         // If we have logs, extract student info from the first log
         if (logs.length > 0) {
           setStudentInfo({
-            usn: logs[0].usn,
+            empid: logs[0].usn,
             name: logs[0].studentName,
             department: logs[0].department,
             class: logs[0].class,
@@ -112,7 +112,7 @@ const ParentDashboard = () => {
         } else {
           // Fallback: try to get student from Student model
           try {
-            const studentInfoRes = await api.get(`/auth/student/${user.linkedStudentUSN}`);
+            const studentInfoRes = await api.get(`/auth/employee/${user.linkedEmpId}`);
             if (studentInfoRes.data.success) {
               setStudentInfo(studentInfoRes.data.data);
             }
@@ -128,7 +128,7 @@ const ParentDashboard = () => {
       // Fetch student's enrolled courses
       if (user.linkedStudentUSN) {
         try {
-          const coursesResponse = await api.get(`/courses/student/${user.linkedStudentUSN}/enrollments`);
+          const coursesResponse = await api.get(`/courses/employee/${user.linkedEmpId}/enrollments`);
           console.log('📚 Student courses:', coursesResponse.data);
           if (coursesResponse.data.success) {
             setEnrolledCourses(coursesResponse.data.data || []);
@@ -139,7 +139,7 @@ const ParentDashboard = () => {
 
         // Fetch student's certificates
         try {
-          const certsResponse = await api.get(`/courses/student/${user.linkedStudentUSN}/certificates`);
+          const certsResponse = await api.get(`/courses/employee/${user.linkedEmpId}/certificates`);
           console.log('🏆 Student certificates:', certsResponse.data);
           if (certsResponse.data.success) {
             setCertificates(certsResponse.data.data || []);
@@ -150,8 +150,8 @@ const ParentDashboard = () => {
 
         // Fetch student's interview reports
         try {
-          console.log('🎤 Fetching interview reports for USN:', user.linkedStudentUSN);
-          const interviewResponse = await api.get(`/interview/results/${user.linkedStudentUSN}`);
+          console.log('🎤 Fetching interview reports for Employee ID:', user.linkedEmpId);
+          const interviewResponse = await api.get(`/interview/results/${user.linkedEmpId}`);
           console.log('🎤 Student interview reports response:', interviewResponse.data);
           if (interviewResponse.data.success) {
             const reports = interviewResponse.data.data || [];
@@ -172,8 +172,8 @@ const ParentDashboard = () => {
 
         // Fetch internship data
         try {
-          console.log('💼 Fetching internship data for USN:', user.linkedStudentUSN);
-          const internshipResponse = await api.get(`/internships/student/${user.linkedStudentUSN}`);
+          console.log('💼 Fetching internship data for Employee ID:', user.linkedEmpId);
+          const internshipResponse = await api.get(`/internships/employee/${user.linkedEmpId}`);
           if (internshipResponse.data.success) {
             setInternships(internshipResponse.data.data.enrollments || []);
             console.log(`✅ Found ${internshipResponse.data.data.enrollments.length} internships`);
@@ -185,8 +185,8 @@ const ParentDashboard = () => {
 
         // Fetch hackathon data
         try {
-          console.log('🏆 Fetching hackathon data for USN:', user.linkedStudentUSN);
-          const hackathonResponse = await api.get(`/hackathons/student/${user.linkedStudentUSN}`);
+          console.log('🏆 Fetching hackathon data for Employee ID:', user.linkedEmpId);
+          const hackathonResponse = await api.get(`/hackathons/employee/${user.linkedEmpId}`);
           if (hackathonResponse.data.success) {
             setHackathons(hackathonResponse.data.data.teams || []);
             console.log(`✅ Found ${hackathonResponse.data.data.teams.length} hackathons`);
@@ -301,7 +301,7 @@ const ParentDashboard = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${user.linkedStudentUSN}_attendance_${new Date().toLocaleDateString()}.csv`;
+    a.download = `${user.linkedEmpId}_attendance_${new Date().toLocaleDateString()}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
     toast.success('Attendance data exported');
@@ -325,13 +325,7 @@ const ParentDashboard = () => {
     </motion.div>
   );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-600"></div>
-      </div>
-    );
-  }
+
 
   const subjectWiseData = getSubjectWiseData();
   const trendData = getTrendData();
@@ -343,10 +337,10 @@ const ParentDashboard = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-              Welcome, {user?.name}! 👨‍👩‍👧
+              Welcome, {user?.name}! 🏢
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Monitor your child's attendance in real-time
+              Monitor your employee's attendance and performance in real-time
             </p>
           </div>
           <div className="flex gap-3">
@@ -355,35 +349,35 @@ const ParentDashboard = () => {
               className="btn btn-primary flex items-center gap-2"
             >
               <Video className="w-5 h-5" />
-              Mentor Connect
+              Manager Connect
             </Link>
             <Link
-              to="/dashboard/parent/faq"
+              to="/dashboard/hr/faq"
               className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
             >
               <HelpCircle className="w-5 h-5" />
               FAQs & Help
             </Link>
             <Link
-              to="/dashboard/parent/about"
+              to="/dashboard/hr/about"
               className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
             >
               <Info className="w-5 h-5" />
               About
             </Link>
             <Link
-              to="/dashboard/parent/grade-viewer"
+              to="/dashboard/hr/grade-viewer"
               className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
             >
               <TrendingUp className="w-5 h-5" />
-              Grade Reports
+              Performance Reports
             </Link>
             <Link
-              to="/dashboard/parent/student-wellbeing"
+              to="/dashboard/hr/student-wellbeing"
               className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
             >
               <Heart className="w-5 h-5" />
-              Student Wellbeing
+              Employee Wellbeing
             </Link>
             <button
               onClick={fetchDashboardData}
@@ -392,6 +386,18 @@ const ParentDashboard = () => {
               <RefreshCw className="w-5 h-5" />
               Refresh
             </button>
+            <Link
+              to="/dashboard/parent/profile"
+              className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-500 hover:border-primary-600 transition-all flex-shrink-0 bg-gray-100 dark:bg-gray-700"
+            >
+              {user?.profilePhoto ? (
+                <img src={user.profilePhoto} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-gray-400" />
+                </div>
+              )}
+            </Link>
             <button onClick={exportToCSV} className="btn btn-secondary flex items-center gap-2">
               <Download className="w-5 h-5" />
               Export CSV
@@ -414,8 +420,8 @@ const ParentDashboard = () => {
                 <h2 className="text-2xl font-bold mb-2">{studentInfo.name}</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <p className="opacity-80">USN</p>
-                    <p className="font-semibold">{studentInfo.usn}</p>
+                    <p className="opacity-80">Employee ID</p>
+                    <p className="font-semibold">{studentInfo.empid}</p>
                   </div>
                   <div>
                     <p className="opacity-80">Department</p>
@@ -439,21 +445,21 @@ const ParentDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             icon={Calendar}
-            label="Total Classes"
+            label="Total Work Days"
             value={stats.totalClasses}
             color="text-blue-600"
             bgColor="bg-blue-50 dark:bg-blue-900/20"
           />
           <StatCard
             icon={TrendingUp}
-            label="Classes Attended"
+            label="Days Present"
             value={stats.present}
             color="text-green-600"
             bgColor="bg-green-50 dark:bg-green-900/20"
           />
           <StatCard
             icon={Clock}
-            label="Classes Missed"
+            label="Days Absent"
             value={stats.absent}
             color="text-red-600"
             bgColor="bg-red-50 dark:bg-red-900/20"
@@ -506,7 +512,7 @@ const ParentDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             className="card"
           >
-            <h2 className="text-xl font-bold mb-4">Subject-wise Attendance</h2>
+            <h2 className="text-xl font-bold mb-4">Department-wise Attendance</h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={subjectWiseData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -549,7 +555,7 @@ const ParentDashboard = () => {
           >
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
               <BookOpen className="w-6 h-6 text-primary-600" />
-              Enrolled Courses ({enrolledCourses.length})
+              Enrolled Training Programs ({enrolledCourses.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {enrolledCourses.map((enrollment) => (
@@ -678,14 +684,14 @@ const ParentDashboard = () => {
         >
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Briefcase className="w-6 h-6 text-primary-600" />
-            Interview Performance ({interviewReports.length})
+            Interview Prep Performance ({interviewReports.length})
           </h2>
           {interviewReports.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {interviewReports.slice(0, 4).map((report) => (
                 <Link
                   key={report._id}
-                  to={`/dashboard/student/interview/results/${report._id}`}
+                  to={`/dashboard/employee/interview/results/${report._id}`}
                   className="border-2 border-primary-200 dark:border-primary-700 rounded-lg p-4 bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 hover:shadow-lg transition-all hover:scale-105 cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -742,7 +748,7 @@ const ParentDashboard = () => {
               {interviewReports.length > 4 && (
                 <div className="mt-4 text-center">
                   <Link
-                    to="/dashboard/student/interview"
+                    to="/dashboard/employee/interview"
                     className="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:underline font-semibold"
                   >
                     View All Interview Reports
@@ -758,7 +764,7 @@ const ParentDashboard = () => {
                 No interview reports available yet
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-500">
-                Your child hasn't completed any mock interviews yet.
+                This employee hasn't completed any mock interviews yet.
               </p>
             </div>
           )}
@@ -772,7 +778,7 @@ const ParentDashboard = () => {
         >
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Code className="w-6 h-6 text-blue-600" />
-            Internship Progress ({internships.length})
+            Onboarding & Training Progress ({internships.length})
           </h2>
           {internships.length > 0 ? (
             <div className="space-y-4">
@@ -1030,4 +1036,4 @@ const ParentDashboard = () => {
   );
 };
 
-export default ParentDashboard;
+export default HRDashboard;

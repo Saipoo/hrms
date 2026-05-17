@@ -8,13 +8,16 @@ import {
   ChevronLeft,
   ChevronRight,
   Sun,
-  Moon
+  Moon,
+  Building2,
+  Home,
+  ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import toast from 'react-hot-toast';
 
-const DashboardLayout = ({ children, menuItems, role }) => {
+const DashboardLayout = ({ children, menuItems, role, title }) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -32,35 +35,81 @@ const DashboardLayout = ({ children, menuItems, role }) => {
     return location.pathname === path;
   };
 
+  // HRMS role display mapping
+  const roleDisplayMap = {
+    student: 'Employee',
+    teacher: 'Manager',
+    parent: 'HR Manager',
+    admin: 'System Administrator'
+  };
+  const displayRole = roleDisplayMap[role] || role.charAt(0).toUpperCase() + role.slice(1);
+
+  // Role home dashboard map
+  const roleDashboardMap = {
+    student: '/dashboard/employee',
+    teacher: '/dashboard/manager',
+    parent: '/dashboard/hr',
+    admin: '/dashboard/admin'
+  };
+  const homePath = roleDashboardMap[role] || '/dashboard/employee';
+
   const SidebarContent = ({ mobile = false }) => (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          {sidebarOpen || mobile ? (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">
-                  {user?.name?.charAt(0) || 'U'}
+      {/* Header / Profile */}
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        {sidebarOpen || mobile ? (
+          <div className="flex flex-col items-center text-center py-2">
+            {/* Avatar */}
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-3 shadow-lg ring-2 ring-white dark:ring-gray-700">
+              {user?.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user?.name}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-white font-bold text-2xl">
+                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-800 dark:text-white">
-                  {user?.name || 'User'}
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                  {role}
-                </p>
-              </div>
+              )}
             </div>
-          ) : (
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto">
-              <span className="text-white font-bold text-lg">
-                {user?.name?.charAt(0) || 'U'}
-              </span>
+            {/* Name */}
+            <h3 className="font-bold text-gray-800 dark:text-white text-sm leading-tight">
+              {user?.name || 'User'}
+            </h3>
+            {/* Role badge */}
+            <span className="mt-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs rounded-full font-medium">
+              {displayRole}
+            </span>
+            {/* Emp ID & Department */}
+            {(user?.empid || user?.usn) && (
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-mono">
+                ID: {user?.empid || user?.usn}
+              </p>
+            )}
+            {user?.department && (
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate w-full">
+                {user.department}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="flex justify-center py-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
+              {user?.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user?.name}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-white font-bold">
+                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </span>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Navigation Menu */}
@@ -202,19 +251,37 @@ const DashboardLayout = ({ children, menuItems, role }) => {
               >
                 <Menu className="w-6 h-6" />
               </button>
+              {/* Back + Home buttons */}
+              <button
+                onClick={() => navigate(-1)}
+                className="hidden md:flex items-center gap-1 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+                title="Go back"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back</span>
+              </button>
+              <button
+                onClick={() => navigate(homePath)}
+                className="hidden md:flex items-center gap-1 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+                title="Go to Dashboard"
+              >
+                <Home className="w-4 h-4" />
+                <span>Home</span>
+              </button>
+              <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 hidden md:block" />
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  ConnectBook
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-1">
+                  {title || 'WorkSphere HRMS'}
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {role.charAt(0).toUpperCase() + role.slice(1)} Dashboard
+                  {title ? 'WorkSphere HRMS' : `${displayRole} Dashboard`}
                 </p>
               </div>
             </div>
             
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                {user?.email || user?.usn}
+                {user?.email || user?.empid || user?.usn}
               </span>
             </div>
           </div>

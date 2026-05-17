@@ -484,9 +484,9 @@ router.get('/student/:studentId/enrollments', protect, async (req, res) => {
     
     // Check if studentId is USN or ObjectId
     let enrollments;
-    if (studentId.match(/^[0-9A-Z]{10}$/)) {
-      // It's a USN
-      enrollments = await CourseEnrollment.find({ studentUSN: studentId.toUpperCase() })
+    if (studentId.match(/^[0-9A-Z]{4,15}$/)) {
+      // It's an empid
+      enrollments = await CourseEnrollment.find({ empid: studentId.toUpperCase() })
         .populate('courseId')
         .sort({ enrolledAt: -1 });
     } else {
@@ -534,9 +534,9 @@ router.get('/student/:studentId/certificates', protect, async (req, res) => {
     
     // Check if studentId is USN or ObjectId
     let certificates;
-    if (studentId.match(/^[0-9A-Z]{10}$/)) {
-      // It's a USN
-      certificates = await Certificate.find({ studentUSN: studentId.toUpperCase() })
+    if (studentId.match(/^[0-9A-Z]{4,15}$/)) {
+      // It's an empid
+      certificates = await Certificate.find({ empid: studentId.toUpperCase() })
         .populate('courseId')
         .sort({ issuedDate: -1 });
     } else {
@@ -649,7 +649,7 @@ router.post('/enroll/:courseId', protect, authorize('student'), async (req, res)
       courseId: course._id,
       courseName: course.title,
       studentId: req.user._id,
-      studentUSN: req.user.usn,
+      empid: req.user.empid,
       studentName: req.user.name,
       videoProgress: [],
       quizAttempts: [],

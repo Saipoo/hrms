@@ -54,7 +54,7 @@ const courseEnrollmentSchema = new mongoose.Schema({
     ref: 'Student',
     required: true
   },
-  studentUSN: {
+  empid: {
     type: String,
     required: true
   },
@@ -94,7 +94,7 @@ const courseEnrollmentSchema = new mongoose.Schema({
 
 // Indexes for efficient queries
 courseEnrollmentSchema.index({ courseId: 1, studentId: 1 }, { unique: true });
-courseEnrollmentSchema.index({ studentUSN: 1 });
+courseEnrollmentSchema.index({ empid: 1 });
 courseEnrollmentSchema.index({ completed: 1 });
 
 // Calculate overall progress before saving

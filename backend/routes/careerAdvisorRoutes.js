@@ -11,8 +11,17 @@ import {
   generateResume,
   calculateReadinessScore,
   analyzeQuizResults,
-  generateCareerRoadmap
+  generateCareerRoadmap,
+  parseResume
 } from '../services/careerAdvisorAIService.js';
+import multer from 'multer';
+import { extractTextFromPDF, extractTextFromDOCX } from '../utils/textExtractor.js';
+
+// Multer config for file uploads
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
 const router = express.Router();
 
@@ -24,7 +33,7 @@ const router = express.Router();
 router.post('/profile', protect, authorize('student'), async (req, res) => {
   try {
     // Check if profile already exists
-    let careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    let careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (careerProfile) {
       return res.status(200).json({
@@ -38,7 +47,7 @@ router.post('/profile', protect, authorize('student'), async (req, res) => {
     const { interests, preferences } = req.body;
 
     careerProfile = await CareerProfile.create({
-      usn: req.user.usn,
+      empid: req.user.empid,
       studentName: req.user.name,
       email: req.user.email,
       interests: interests || [],
@@ -65,22 +74,20 @@ router.post('/profile', protect, authorize('student'), async (req, res) => {
 // @access  Private (Student, Parent, Teacher)
 router.get('/profile', protect, authorize('student', 'parent', 'teacher'), async (req, res) => {
   try {
-    let usn;
-
     if (req.user.role === 'student') {
-      usn = req.user.usn;
+      empid = req.user.empid;
     } else {
-      usn = req.query.usn;
+      empid = req.query.empid;
       
-      if (!usn) {
+      if (!empid) {
         return res.status(400).json({
           success: false,
-          message: 'USN is required for non-student users'
+          message: 'EmpID is required for non-employee users'
         });
       }
     }
 
-    const careerProfile = await CareerProfile.findOne({ usn });
+    const careerProfile = await CareerProfile.findOne({ empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -136,7 +143,7 @@ router.get('/profile', protect, authorize('student', 'parent', 'teacher'), async
 // @access  Private (Student)
 router.put('/profile', protect, authorize('student'), async (req, res) => {
   try {
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -176,40 +183,28 @@ router.put('/profile', protect, authorize('student'), async (req, res) => {
 // @access  Private (Student)
 router.post('/analyze', protect, authorize('student'), async (req, res) => {
   try {
-    let careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    let careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       // Create profile if doesn't exist
       careerProfile = await CareerProfile.create({
-        usn: req.user.usn,
+        empid: req.user.empid,
         studentName: req.user.name,
         email: req.user.email
       });
     }
 
-    // Sync integration data first
-    await careerProfile.syncIntegrationData();
-
-    // Get recent grades
-    const grades = await Grade.find({ usn: req.user.usn }).sort({ createdAt: -1 }).limit(20);
-
-    // Prepare student data for AI
-    const studentData = {
-      usn: req.user.usn,
+    // Prepare employee data for AI
+    const employeeData = {
+      empid: req.user.empid,
       name: req.user.name,
       interests: careerProfile.interests,
       currentSkills: careerProfile.currentSkills,
-      integrationData: careerProfile.integrationData,
-      grades: grades.map(g => ({
-        subject: g.subject,
-        marks: g.marks,
-        totalMarks: g.totalMarks,
-        percentage: (g.marks / g.totalMarks) * 100
-      }))
+      integrationData: careerProfile.integrationData
     };
 
     // Analyze career paths using AI
-    const careerPathsResult = await analyzeCareerPaths(studentData);
+    const careerPathsResult = await analyzeCareerPaths(employeeData);
     
     // Check if analysis was successful
     if (!careerPathsResult.success || !careerPathsResult.recommendations) {
@@ -280,7 +275,7 @@ router.post('/analyze', protect, authorize('student'), async (req, res) => {
 // @access  Private (Student)
 router.get('/recommendations', protect, authorize('student'), async (req, res) => {
   try {
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -320,7 +315,7 @@ router.post('/choose-path', protect, authorize('student'), async (req, res) => {
   try {
     const { pathTitle, targetDate } = req.body;
 
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -407,7 +402,7 @@ router.post('/analyze-skills', protect, authorize('student'), async (req, res) =
       });
     }
 
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -463,7 +458,7 @@ router.post('/analyze-skills', protect, authorize('student'), async (req, res) =
 // @access  Private (Student)
 router.get('/skill-gaps', protect, authorize('student'), async (req, res) => {
   try {
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -499,7 +494,7 @@ router.put('/skill-progress', protect, authorize('student'), async (req, res) =>
   try {
     const { skillName, progress } = req.body;
 
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -555,11 +550,11 @@ router.put('/skill-progress', protect, authorize('student'), async (req, res) =>
 // ==================== RESUME GENERATION ====================
 
 // @desc    Generate AI resume
-// @route   POST /api/career/generate-resume
+// @route   POST /api/career/resume/generate
 // @access  Private (Student)
-router.post('/generate-resume', protect, authorize('student'), async (req, res) => {
+router.post('/resume/generate', protect, authorize('student'), async (req, res) => {
   try {
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -586,13 +581,13 @@ router.post('/generate-resume', protect, authorize('student'), async (req, res) 
 
     // Update resume in profile
     careerProfile.resume = {
-      summary: generatedResume.summary,
-      education: generatedResume.education || [],
-      experience: generatedResume.experience || [],
-      projects: generatedResume.projects || [],
-      certifications: generatedResume.certifications || [],
-      skills: generatedResume.skills || [],
-      achievements: generatedResume.achievements || [],
+      summary: (generatedResume.resume || generatedResume).summary || '',
+      education: (generatedResume.resume || generatedResume).education || [],
+      experience: (generatedResume.resume || generatedResume).experience || [],
+      projects: (generatedResume.resume || generatedResume).projects || [],
+      certifications: (generatedResume.resume || generatedResume).certifications || [],
+      skills: (generatedResume.resume || generatedResume).skills || [],
+      achievements: (generatedResume.resume || generatedResume).achievements || [],
       lastGenerated: new Date()
     };
 
@@ -601,7 +596,7 @@ router.post('/generate-resume', protect, authorize('student'), async (req, res) 
     res.status(200).json({
       success: true,
       message: 'Resume generated successfully',
-      data: generatedResume
+      data: careerProfile.resume
     });
   } catch (error) {
     console.error('Error generating resume:', error);
@@ -613,27 +608,102 @@ router.post('/generate-resume', protect, authorize('student'), async (req, res) 
   }
 });
 
+// @desc    Optimize resume based on job description
+// @route   POST /api/career/resume/optimize
+// @access  Private (Student)
+router.post('/resume/optimize', protect, authorize('student'), async (req, res) => {
+  try {
+    const { resumeContent, jobDescription } = req.body;
+    
+    if (!resumeContent || !jobDescription) {
+      return res.status(400).json({
+        success: false,
+        message: 'Resume content and Job Description are required'
+      });
+    }
+
+    const { optimizeResume } = await import('../services/careerAdvisorAIService.js');
+    const result = await optimizeResume(resumeContent, jobDescription);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error optimizing resume:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to optimize resume',
+      error: error.message
+    });
+  }
+});
+
+// @desc    Parse uploaded resume (PDF/DOCX)
+// @route   POST /api/career/resume/parse
+// @access  Private (Student)
+router.post('/resume/parse', protect, authorize('student'), upload.single('resume'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+
+    const { buffer, mimetype, originalname } = req.file;
+    let text = '';
+
+    if (mimetype === 'application/pdf') {
+      text = await extractTextFromPDF(buffer);
+    } else if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mimetype === 'application/msword') {
+      text = await extractTextFromDOCX(buffer);
+    } else if (mimetype === 'text/plain') {
+      text = buffer.toString('utf8');
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Unsupported file type. Please upload PDF, DOCX, or TXT.'
+      });
+    }
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to extract text from file'
+      });
+    }
+
+    const result = await parseResume(text.substring(0, 10000), mimetype); // Pass text to AI
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error parsing resume:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to parse resume',
+      error: error.message
+    });
+  }
+});
+
 // @desc    Get resume
 // @route   GET /api/career/resume
 // @access  Private (Student, Parent with permission)
 router.get('/resume', protect, authorize('student', 'parent'), async (req, res) => {
   try {
-    let usn;
-
+    let empid;
     if (req.user.role === 'student') {
-      usn = req.user.usn;
+      empid = req.user.empid;
     } else {
-      usn = req.query.usn;
+      empid = req.query.empid;
       
-      if (!usn) {
+      if (!empid) {
         return res.status(400).json({
           success: false,
-          message: 'USN is required for non-student users'
+          message: 'EmpID is required for non-employee users'
         });
       }
     }
 
-    const careerProfile = await CareerProfile.findOne({ usn });
+    const careerProfile = await CareerProfile.findOne({ empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -669,7 +739,7 @@ router.get('/resume', protect, authorize('student', 'parent'), async (req, res) 
 // @access  Private (Student)
 router.put('/resume', protect, authorize('student'), async (req, res) => {
   try {
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -725,7 +795,7 @@ router.post('/quiz/:type', protect, authorize('student'), async (req, res) => {
       });
     }
 
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -767,7 +837,7 @@ router.post('/quiz/:type', protect, authorize('student'), async (req, res) => {
 // @access  Private (Student)
 router.get('/quiz-results', protect, authorize('student'), async (req, res) => {
   try {
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -799,7 +869,7 @@ router.post('/connect-mentor', protect, authorize('student'), async (req, res) =
   try {
     const { mentorEmail, careerPath, message } = req.body;
 
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -880,22 +950,20 @@ router.get('/mentor-connections', protect, authorize('student'), async (req, res
 // @access  Private (Student, Parent with permission)
 router.get('/readiness-score', protect, authorize('student', 'parent'), async (req, res) => {
   try {
-    let usn;
-
     if (req.user.role === 'student') {
-      usn = req.user.usn;
+      empid = req.user.empid;
     } else {
-      usn = req.query.usn;
+      empid = req.query.empid;
       
-      if (!usn) {
+      if (!empid) {
         return res.status(400).json({
           success: false,
-          message: 'USN is required for non-student users'
+          message: 'EmpID is required for non-employee users'
         });
       }
     }
 
-    const careerProfile = await CareerProfile.findOne({ usn });
+    const careerProfile = await CareerProfile.findOne({ empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -1540,42 +1608,35 @@ IMPORTANT: Return ONLY the JSON object.`;
 router.post('/resume/suggest', protect, authorize('student'), async (req, res) => {
   try {
     const { section, currentText, context } = req.body;
+    
+    if (!section || !currentText) {
+      return res.status(400).json({
+        success: false,
+        message: 'Section and Current Text are required'
+      });
+    }
 
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const { default: AIService } = await import('../services/AIService.js');
 
-    const prompt = `You are a resume writing assistant. Provide 3-5 suggestions to improve this resume section.
+    const prompt = `You are a professional resume writing assistant. Provide 3-5 suggestions to improve this resume section for an HRMS profile.
 
 Section: ${section}
 Current Text: ${currentText}
-Context: ${context || 'General improvement'}
+Context/Job Description: ${context || 'General professional improvement'}
 
 Provide actionable suggestions with:
 - Stronger action verbs
-- Quantifiable metrics
+- Quantifiable metrics (impact)
 - ATS-optimized keywords
-- Professional tone
+- Corporate tone
 
-Return a JSON array of suggestions:
-["Suggestion 1", "Suggestion 2", "Suggestion 3"]
+Return a JSON array of 3-5 strings only.`;
 
-IMPORTANT: Return ONLY the JSON array.`;
-
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const text = response.text();
-    
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
-      throw new Error('Failed to parse suggestions from AI response');
-    }
-    
-    const suggestions = JSON.parse(jsonMatch[0]);
+    const suggestions = await AIService.generateContent(prompt, { jsonMode: true });
 
     res.status(200).json({
       success: true,
-      data: suggestions
+      data: Array.isArray(suggestions) ? suggestions : []
     });
   } catch (error) {
     console.error('Error getting resume suggestions:', error);
@@ -1592,7 +1653,7 @@ IMPORTANT: Return ONLY the JSON array.`;
 // @access  Private (Student)
 router.get('/resume/list', protect, authorize('student'), async (req, res) => {
   try {
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({
@@ -1620,7 +1681,7 @@ router.get('/resume/list', protect, authorize('student'), async (req, res) => {
 // @access  Private (Student)
 router.delete('/resume/:id', protect, authorize('student'), async (req, res) => {
   try {
-    const careerProfile = await CareerProfile.findOne({ usn: req.user.usn });
+    const careerProfile = await CareerProfile.findOne({ empid: req.user.empid });
 
     if (!careerProfile) {
       return res.status(404).json({

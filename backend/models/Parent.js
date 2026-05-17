@@ -20,11 +20,27 @@ const parentSchema = new mongoose.Schema({
     minlength: 6,
     select: false
   },
-  linkedStudentUSN: {
+  empid: {
     type: String,
-    required: [true, 'Linked Student USN is required'],
+    required: [true, 'EmpID is required'],
+    unique: true,
     uppercase: true,
     trim: true
+  },
+  department: {
+    type: String,
+    required: [true, 'Department is required'],
+    trim: true
+  },
+  linkedEmpId: {
+    type: String,
+    required: [true, 'Linked Employee ID is required'],
+    uppercase: true,
+    trim: true
+  },
+  profilePhoto: {
+    type: String,
+    default: ''
   },
   role: {
     type: String,

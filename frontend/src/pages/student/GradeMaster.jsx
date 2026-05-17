@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiUpload, FiFileText, FiCheckCircle, FiClock, FiAlertCircle, FiAward, FiTrendingUp, FiBook } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+import PageHeader from '../../components/PageHeader';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
 
 const GradeMaster = () => {
   const { user } = useAuth();
@@ -18,16 +21,16 @@ const GradeMaster = () => {
     answerScript: null
   });
 
-  const subjects = [
-    'Mathematics',
-    'Physics',
-    'Chemistry',
-    'Biology',
-    'Computer Science',
-    'English',
-    'History',
-    'Geography',
-    'Economics'
+  const categories = [
+    'Leadership',
+    'Operational Efficiency',
+    'Innovation & Problem Solving',
+    'Team Collaboration',
+    'Corporate Compliance',
+    'Technical Excellence',
+    'Strategic Thinking',
+    'Customer Success',
+    'Process Improvement'
   ];
 
   // Fetch submissions and results
@@ -120,29 +123,13 @@ const GradeMaster = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center gap-4 mb-2">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl">
-              <FiBook className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-                Grade Master
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400">
-                AI-Powered Answer Script Evaluation
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="KPIs & Performance"
+    >
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Upload Section */}
           <motion.div
@@ -153,14 +140,14 @@ const GradeMaster = () => {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
               <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
                 <FiUpload className="w-5 h-5" />
-                Submit Answer Script
+                Submit Performance Evidence
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Subject Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Subject
+                    KPI Category
                   </label>
                   <select
                     value={formData.subject}
@@ -168,9 +155,9 @@ const GradeMaster = () => {
                     className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   >
-                    <option value="">Select Subject</option>
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>{subject}</option>
+                    <option value="">Select Category</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
                 </div>
@@ -178,7 +165,7 @@ const GradeMaster = () => {
                 {/* File Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Answer Script (PDF/DOCX)
+                    Evidence Document (PDF/DOCX)
                   </label>
                   <div className="relative">
                     <input
@@ -478,7 +465,8 @@ const GradeMaster = () => {
           )}
         </AnimatePresence>
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 const studentFaceSchema = new mongoose.Schema({
-  usn: {
+  empid: {
     type: String,
-    required: [true, 'USN is required'],
+    required: [true, 'EmpID is required'],
     unique: true,
     uppercase: true,
     trim: true
@@ -18,9 +18,9 @@ const studentFaceSchema = new mongoose.Schema({
     required: [true, 'Department is required'],
     trim: true
   },
-  class: {
+  designation: {
     type: String,
-    required: [true, 'Class is required'],
+    required: [true, 'Designation is required'],
     trim: true
   },
   embeddings: {
@@ -40,6 +40,6 @@ const studentFaceSchema = new mongoose.Schema({
 });
 
 // Index for faster queries
-studentFaceSchema.index({ usn: 1 });
+studentFaceSchema.index({ empid: 1 });
 
 export default mongoose.model('StudentFace', studentFaceSchema);

@@ -46,8 +46,8 @@ const upload = multer({
 
 // @route   POST /api/mentor/connect/chat/send
 // @desc    Send a message
-// @access  Private (Teacher/Parent only)
-router.post('/send', protect, authorize('teacher', 'parent'), async (req, res) => {
+// @access  Private (All Roles)
+router.post('/send', protect, async (req, res) => {
   try {
     const { receiverId, receiverRole, studentUSN, messageType, content } = req.body;
 
@@ -132,8 +132,8 @@ router.post('/send', protect, authorize('teacher', 'parent'), async (req, res) =
 
 // @route   POST /api/mentor/connect/chat/send-file
 // @desc    Send a file message
-// @access  Private (Teacher/Parent only)
-router.post('/send-file', protect, authorize('teacher', 'parent'), upload.single('file'), async (req, res) => {
+// @access  Private (All Roles)
+router.post('/send-file', protect, upload.single('file'), async (req, res) => {
   try {
     const { receiverId, receiverRole, studentUSN, messageType } = req.body;
 
@@ -187,8 +187,8 @@ router.post('/send-file', protect, authorize('teacher', 'parent'), upload.single
 
 // @route   GET /api/mentor/connect/chat/:userId
 // @desc    Get chat messages between current user and another user
-// @access  Private (Teacher/Parent only)
-router.get('/:userId', protect, authorize('teacher', 'parent'), async (req, res) => {
+// @access  Private (All Roles)
+router.get('/:userId', protect, async (req, res) => {
   try {
     const { userId } = req.params;
     const currentUserId = req.user._id;
@@ -231,8 +231,8 @@ router.get('/:userId', protect, authorize('teacher', 'parent'), async (req, res)
 
 // @route   PATCH /api/mentor/connect/chat/seen/:messageId
 // @desc    Mark message as seen
-// @access  Private (Teacher/Parent only)
-router.patch('/seen/:messageId', protect, authorize('teacher', 'parent'), async (req, res) => {
+// @access  Private (All Roles)
+router.patch('/seen/:messageId', protect, async (req, res) => {
   try {
     const { messageId } = req.params;
 
@@ -278,8 +278,8 @@ router.patch('/seen/:messageId', protect, authorize('teacher', 'parent'), async 
 
 // @route   PATCH /api/mentor/connect/chat/seen-all/:userId
 // @desc    Mark all messages from a user as seen
-// @access  Private (Teacher/Parent only)
-router.patch('/seen-all/:userId', protect, authorize('teacher', 'parent'), async (req, res) => {
+// @access  Private (All Roles)
+router.patch('/seen-all/:userId', protect, async (req, res) => {
   try {
     const { userId } = req.params;
     const currentUserId = req.user._id;
@@ -320,74 +320,57 @@ router.patch('/seen-all/:userId', protect, authorize('teacher', 'parent'), async
 });
 
 // @route   GET /api/mentor/connect/chat/contacts/list
-// @desc    Get list of contacts (teachers for parents, parents for teachers)
-// @access  Private (Teacher/Parent only)
-router.get('/contacts/list', protect, authorize('teacher', 'parent'), async (req, res) => {
+// @desc    Get list of all contacts (cross-role communication)
+// @access  Private (All Roles)
+router.get('/contacts/list', protect, async (req, res) => {
   try {
     let contacts = [];
+    const currentUserId = req.user._id.toString();
 
-    if (req.user.role === 'parent') {
-      // Get all teachers linked to the student
-      const student = await Student.findOne({ usn: req.user.linkedStudentUSN });
-      
-      if (!student) {
-        return res.status(404).json({
-          success: false,
-          message: 'Linked student not found'
-        });
-      }
+    // Fetch all users from all collections (excluding the current user)
+    const [students, teachers, parents] = await Promise.all([
+      Student.find({ _id: { $ne: req.user._id } }).select('_id name email usn department class section'),
+      Teacher.find({ _id: { $ne: req.user._id } }).select('_id name email department subjects'),
+      Parent.find({ _id: { $ne: req.user._id } }).select('_id name email linkedStudentUSN')
+    ]);
 
-      // Get all teachers from the same department
-      const teachers = await Teacher.find({ department: student.department })
-        .select('_id name email department subjects');
+    // Format Students
+    const studentContacts = students.map(s => ({
+      _id: s._id,
+      userId: s._id,
+      name: s.name,
+      email: s.email,
+      role: 'student',
+      department: s.department,
+      studentUSN: s.usn,
+      studentName: s.name
+    }));
 
-      contacts = teachers.map(teacher => ({
-        _id: teacher._id,
-        userId: teacher._id,
-        name: teacher.name,
-        email: teacher.email,
-        role: 'teacher',
-        department: teacher.department,
-        subjects: teacher.subjects,
-        studentUSN: student.usn,
-        studentName: student.name
-      }));
-    } else if (req.user.role === 'teacher') {
-      // Get all parents of students in teacher's department/class
-      const teacher = await Teacher.findById(req.user._id);
-      
-      if (!teacher) {
-        return res.status(404).json({
-          success: false,
-          message: 'Teacher not found'
-        });
-      }
+    // Format Teachers
+    const teacherContacts = teachers.map(t => ({
+      _id: t._id,
+      userId: t._id,
+      name: t.name,
+      email: t.email,
+      role: 'teacher',
+      department: t.department,
+      studentUSN: 'STAFF',
+      studentName: t.name
+    }));
 
-      // Find all students in the teacher's department
-      const students = await Student.find({ 
-        department: teacher.department 
-      }).select('_id name usn class section department');
+    // Format Parents
+    const parentContacts = parents.map(p => ({
+      _id: p._id,
+      userId: p._id,
+      name: p.name,
+      email: p.email,
+      role: 'parent',
+      studentUSN: p.linkedStudentUSN,
+      studentName: p.name
+    }));
 
-      // For each student, find their parent
-      for (const student of students) {
-        const parent = await Parent.findOne({ linkedStudentUSN: student.usn })
-          .select('_id name email linkedStudentUSN');
-        
-        if (parent) {
-          contacts.push({
-            _id: parent._id,
-            userId: parent._id,
-            name: parent.name,
-            email: parent.email,
-            role: 'parent',
-            studentUSN: student.usn,
-            studentName: student.name,
-            studentClass: student.class,
-            studentSection: student.section
-          });
-        }
-      }
-    }
+    // Combine all contacts
+    contacts = [...studentContacts, ...teacherContacts, ...parentContacts];
 
     res.status(200).json({
       success: true,

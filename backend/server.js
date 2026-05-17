@@ -33,7 +33,7 @@ import interviewRoutes from './routes/interviewRoutes.js';
 import internshipRoutes from './routes/internshipRoutes.js';
 import hackathonRoutes from './routes/hackathonRoutes.js';
 import studyPlannerRoutes from './routes/studyPlannerRoutes.js';
-import careerAdvisorRoutes from './routes/careerAdvisorRoutes.js';
+import careerGrowthRoutes from './routes/careerAdvisorRoutes.js';
 import lectureRoutes from './routes/lectureRoutes.js';
 import updateRoutes from './routes/updateRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
@@ -87,7 +87,7 @@ const connectDB = async () => {
     await seedFAQs();
     
     // Initialize cron jobs for real-time updates
-    initializeUpdateCronJobs();
+    // initializeUpdateCronJobs();
     
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
@@ -306,7 +306,7 @@ app.use('/api/interview', interviewRoutes);
 app.use('/api/internships', internshipRoutes);
 app.use('/api/hackathons', hackathonRoutes);
 app.use('/api/study-planner', studyPlannerRoutes);
-app.use('/api/career', careerAdvisorRoutes);
+app.use('/api/career', careerGrowthRoutes);
 app.use('/api/lectures', lectureRoutes);
 app.use('/api/updates', updateRoutes);
 app.use('/api/chatbot', chatbotRoutes);
@@ -318,7 +318,7 @@ app.use('/api/confessions', confessionRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'success', 
-    message: 'ConnectBook Backend is running',
+    message: 'WorkSphere HRMS Backend is running',
     timestamp: new Date().toISOString()
   });
 });
@@ -344,7 +344,7 @@ app.use((req, res) => {
 // Start server
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
-  console.log(`🚀 ConnectBook Server running on port ${PORT}`);
+  console.log(`🚀 WorkSphere HRMS Server running on port ${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 

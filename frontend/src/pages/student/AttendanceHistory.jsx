@@ -14,6 +14,8 @@ import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Toolti
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
 
 const AttendanceHistory = () => {
   const { user } = useAuth();
@@ -70,9 +72,9 @@ const AttendanceHistory = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `attendance_${user.usn}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `attendance_${user.empid}_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
-    toast.success('Attendance data downloaded!');
+    toast.success('Attendance data exported!');
   };
 
   // Prepare chart data
@@ -88,44 +90,25 @@ const AttendanceHistory = () => {
     { name: 'Absent', value: stats.absent, color: '#ef4444' }
   ] : [];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-600"></div>
-      </div>
-    );
-  }
+
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Attendance History"
+    >
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto py-12 px-4">
+        {/* Actions */}
+        <div className="mb-8 flex justify-end">
           <button
-            onClick={() => navigate('/dashboard/student')}
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 mb-4"
+            onClick={downloadCSV}
+            className="btn-primary flex items-center gap-2"
           >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Dashboard
+            <Download className="w-5 h-5" />
+            Download CSV
           </button>
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-                <Calendar className="w-8 h-8 text-primary-600" />
-                Attendance History
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                View and analyze your attendance records
-              </p>
-            </div>
-            <button
-              onClick={downloadCSV}
-              className="btn-primary flex items-center gap-2"
-            >
-              <Download className="w-5 h-5" />
-              Download CSV
-            </button>
-          </div>
         </div>
 
         {/* Stats Overview */}
@@ -138,7 +121,7 @@ const AttendanceHistory = () => {
             >
               <Calendar className="w-8 h-8 text-blue-600 mb-2" />
               <h3 className="text-2xl font-bold">{stats.totalClasses}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total Classes</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Work Days</p>
             </motion.div>
 
             <motion.div
@@ -184,7 +167,7 @@ const AttendanceHistory = () => {
             animate={{ opacity: 1, y: 0 }}
             className="card"
           >
-            <h2 className="text-xl font-bold mb-4">Subject-wise Attendance</h2>
+            <h2 className="text-xl font-bold mb-4">Department-wise Attendance</h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={subjectChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -239,13 +222,13 @@ const AttendanceHistory = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Subject</label>
+              <label className="block text-sm font-medium mb-2">Work Module</label>
               <select
                 value={filterSubject}
                 onChange={(e) => setFilterSubject(e.target.value)}
                 className="input-field"
               >
-                <option value="all">All Subjects</option>
+                <option value="all">All Work Modules</option>
                 {Object.keys(subjectWise).map(subject => (
                   <option key={subject} value={subject}>{subject}</option>
                 ))}
@@ -289,7 +272,7 @@ const AttendanceHistory = () => {
                     Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Subject
+                    Work Module
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Time
@@ -356,6 +339,7 @@ const AttendanceHistory = () => {
         </motion.div>
       </div>
     </div>
+    </DashboardLayout>
   );
 };
 

@@ -5,8 +5,12 @@ import {
   CheckCircle, BookOpen, AlertCircle, ChevronRight
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
+import DashboardLayout from '../../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../../constants/menuItems';
+import { useAuth } from '../../../context/AuthContext';
 
 const HackathonDetails = () => {
+  const { user } = useAuth();
   const { hackathonId } = useParams();
   const navigate = useNavigate();
   const [hackathon, setHackathon] = useState(null);
@@ -145,20 +149,24 @@ const HackathonDetails = () => {
   const timeInfo = getTimeRemaining(hackathon.startDate, hackathon.endDate);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-teal-50 p-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
-        <button
-          onClick={() => navigate('/dashboard/student/hackathon')}
-          className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors mb-4"
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Innovation Hackathons"
+    >
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-teal-50 p-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
         >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Hackathons
-        </button>
+          <button
+            onClick={() => navigate('/dashboard/student/hackathon')}
+            className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors mb-4"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Hackathons
+          </button>
 
         {/* Hero Section */}
         <div className="bg-gradient-to-br from-green-500 to-teal-600 rounded-3xl p-8 text-white shadow-2xl">
@@ -453,6 +461,7 @@ const HackathonDetails = () => {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 };
 

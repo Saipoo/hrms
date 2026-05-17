@@ -27,45 +27,16 @@ const generateMeetingLink = (meetingId) => {
 
 // @route   POST /api/mentor/connect/meeting/create
 // @desc    Create a new video meeting
-// @access  Private (Teacher only)
-router.post('/create', protect, authorize('teacher'), async (req, res) => {
+// @access  Private (All Roles)
+router.post('/create', protect, async (req, res) => {
   try {
     const { parentId, studentUSN, title, description, scheduledTime, duration } = req.body;
 
     // Validation
-    if (!parentId || !studentUSN || !title || !scheduledTime) {
-      console.error('Validation failed for meeting.create - missing fields', { body: req.body, sender: req.user._id });
+    if (!title || !scheduledTime) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide parent ID, student USN, title, and scheduled time'
-      });
-    }
-
-    // Verify student exists
-    const student = await Student.findOne({ usn: studentUSN.toUpperCase() });
-    if (!student) {
-      console.error('Student not found during meeting.create', { studentUSN, body: req.body, sender: req.user._id });
-      return res.status(404).json({
-        success: false,
-        message: 'Student not found'
-      });
-    }
-
-    // Verify parent exists and is linked to student
-    const parent = await Parent.findById(parentId);
-    if (!parent) {
-      console.error('Parent not found during meeting.create', { parentId, body: req.body, sender: req.user._id });
-      return res.status(404).json({
-        success: false,
-        message: 'Parent not found'
-      });
-    }
-
-    if (parent.linkedStudentUSN !== studentUSN.toUpperCase()) {
-      console.error('Parent-student link mismatch for meeting.create', { parentLinked: parent.linkedStudentUSN, studentUSN, body: req.body, sender: req.user._id });
-      return res.status(403).json({
-        success: false,
-        message: 'Parent is not linked to this student'
+        message: 'Please provide title and scheduled time'
       });
     }
 
@@ -78,10 +49,10 @@ router.post('/create', protect, authorize('teacher'), async (req, res) => {
       meetingId,
       teacherId: req.user._id,
       teacherName: req.user.name,
-      parentId,
-      parentName: parent.name,
-      studentUSN: studentUSN.toUpperCase(),
-      studentName: student.name,
+      parentId: parentId || null,
+      parentName: '', 
+      studentUSN: (studentUSN || '').toUpperCase(),
+      studentName: '',
       title,
       description: description || '',
       scheduledTime: new Date(scheduledTime),
@@ -92,37 +63,42 @@ router.post('/create', protect, authorize('teacher'), async (req, res) => {
       participants: []
     });
 
-    // Send meeting link as a message to parent
-    const meetingMessage = await Message.create({
-      senderId: req.user._id,
-      senderRole: 'teacher',
-      receiverId: parentId,
-      receiverRole: 'parent',
-      studentUSN: studentUSN.toUpperCase(),
-      messageType: 'meeting_link',
-      content: `📹 Video Meeting Scheduled: ${title}\n\nTime: ${new Date(scheduledTime).toLocaleString()}\nDuration: ${duration} minutes\n\nClick to join: ${meetingLink}`,
-      delivered: false,
-      seen: false
-    });
+    // Send meeting link as a message to invited person if specified
+    let meetingMessage = null;
+    if (parentId) {
+      meetingMessage = await Message.create({
+        senderId: req.user._id,
+        senderRole: req.user.role,
+        receiverId: parentId,
+        receiverRole: 'user', // generic role
+        studentUSN: (studentUSN || '').toUpperCase(),
+        messageType: 'meeting_link',
+        content: `📹 Video Meeting Scheduled: ${title}\n\nTime: ${new Date(scheduledTime).toLocaleString()}\nDuration: ${duration} minutes\n\nClick to join: ${meetingLink}`,
+        delivered: false,
+        seen: false
+      });
+    }
 
-    // Emit socket events to both parent and teacher
+    // Emit socket events to the invited person (if specified) and creator
     const io = req.app.get('io');
     if (io) {
-      // Send to parent
-      io.to(parentId.toString()).emit('meeting_created', {
-        meeting,
-        message: meetingMessage
-      });
-      io.to(parentId.toString()).emit('receive_message', meetingMessage);
-      io.to(parentId.toString()).emit('new_message_notification', {
-        from: req.user.name,
-        message: `Scheduled a video meeting: ${title}`
-      });
+      if (parentId) {
+        // Send to invited user
+        io.to(parentId.toString()).emit('meeting_created', {
+          meeting,
+          message: meetingMessage
+        });
+        io.to(parentId.toString()).emit('receive_message', meetingMessage);
+        io.to(parentId.toString()).emit('new_message_notification', {
+          from: req.user.name,
+          message: `Scheduled a video meeting: ${title}`
+        });
+      }
       
-      // Send to teacher (creator)
+      // Send to creator
       io.to(req.user._id.toString()).emit('meeting_created', {
         meeting,
-        message: null // Teacher doesn't need the message
+        message: null // Creator doesn't need the message
       });
     }
 
@@ -146,8 +122,8 @@ router.post('/create', protect, authorize('teacher'), async (req, res) => {
 
 // @route   GET /api/mentor/connect/meeting/:meetingId
 // @desc    Get meeting details
-// @access  Private (Teacher/Parent only)
-router.get('/:meetingId', protect, authorize('teacher', 'parent'), async (req, res) => {
+// @access  Private (All Roles)
+router.get('/:meetingId', protect, async (req, res) => {
   try {
     const { meetingId } = req.params;
 
@@ -160,14 +136,8 @@ router.get('/:meetingId', protect, authorize('teacher', 'parent'), async (req, r
       });
     }
 
-    // Verify user has access to this meeting
-    const userId = req.user._id.toString();
-    if (meeting.teacherId !== userId && meeting.parentId !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: 'You do not have access to this meeting'
-      });
-    }
+    // Allow anyone with the link/ID to access the meeting details
+    // (Removed strict teacher/parent check to allow sharing links)
 
     res.status(200).json({
       success: true,
@@ -185,19 +155,19 @@ router.get('/:meetingId', protect, authorize('teacher', 'parent'), async (req, r
 
 // @route   GET /api/mentor/connect/meeting/list/my-meetings
 // @desc    Get all meetings for current user
-// @access  Private (Teacher/Parent only)
-router.get('/list/my-meetings', protect, authorize('teacher', 'parent'), async (req, res) => {
+// @access  Private (All Roles)
+router.get('/list/my-meetings', protect, async (req, res) => {
   try {
     const userId = req.user._id;
     const { status } = req.query;
 
-    let query = {};
-    
-    if (req.user.role === 'teacher') {
-      query.teacherId = userId;
-    } else {
-      query.parentId = userId;
-    }
+    let query = {
+      $or: [
+        { teacherId: userId },
+        { parentId: userId },
+        { "participants.userId": userId }
+      ]
+    };
 
     if (status) {
       query.status = status;
@@ -224,8 +194,8 @@ router.get('/list/my-meetings', protect, authorize('teacher', 'parent'), async (
 
 // @route   PATCH /api/mentor/connect/meeting/:meetingId/start
 // @desc    Start a meeting
-// @access  Private (Teacher only)
-router.patch('/:meetingId/start', protect, authorize('teacher'), async (req, res) => {
+// @access  Private (All Roles)
+router.patch('/:meetingId/start', protect, async (req, res) => {
   try {
     const { meetingId } = req.params;
 
@@ -275,8 +245,8 @@ router.patch('/:meetingId/start', protect, authorize('teacher'), async (req, res
 
 // @route   PATCH /api/mentor/connect/meeting/:meetingId/end
 // @desc    End a meeting
-// @access  Private (Teacher only)
-router.patch('/:meetingId/end', protect, authorize('teacher'), async (req, res) => {
+// @access  Private (All Roles)
+router.patch('/:meetingId/end', protect, async (req, res) => {
   try {
     const { meetingId } = req.params;
 
@@ -331,8 +301,8 @@ router.patch('/:meetingId/end', protect, authorize('teacher'), async (req, res) 
 
 // @route   PATCH /api/mentor/connect/meeting/:meetingId/join
 // @desc    Join a meeting
-// @access  Private (Teacher/Parent only)
-router.patch('/:meetingId/join', protect, authorize('teacher', 'parent'), async (req, res) => {
+// @access  Private (All Roles)
+router.patch('/:meetingId/join', protect, async (req, res) => {
   try {
     const { meetingId } = req.params;
 
@@ -345,14 +315,7 @@ router.patch('/:meetingId/join', protect, authorize('teacher', 'parent'), async 
       });
     }
 
-    // Verify user has access
-    const userId = req.user._id.toString();
-    if (meeting.teacherId !== userId && meeting.parentId !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: 'You do not have access to this meeting'
-      });
-    }
+    // Removed access check so anyone can join via link
 
     // Add participant
     meeting.participants.push({

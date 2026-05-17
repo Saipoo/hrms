@@ -260,10 +260,9 @@ const MentorConnect = () => {
 
   const handleCreateMeeting = async (meetingData) => {
     try {
-      // Ensure parentId and studentUSN are present
       const payload = {
         ...meetingData,
-        parentId: meetingData.parentId || selectedContact?._id || selectedContact?.userId,
+        parentId: meetingData.parentId || selectedContact?._id || selectedContact?.userId || '',
         studentUSN: (meetingData.studentUSN || selectedContact?.studentUSN || '').toUpperCase()
       };
       
@@ -312,10 +311,10 @@ const MentorConnect = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-                Mentor Connect
+                Executive Mentorship
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {user?.role === 'teacher' ? 'Connect with Parents' : 'Connect with Teachers'}
+                {user?.role === 'teacher' ? 'Connect with HR' : 'Connect with Managers'}
               </p>
             </div>
           </div>
@@ -406,7 +405,7 @@ const MentorConnect = () => {
                             )}
                           </div>
                           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {contact.role === 'teacher' ? 'Teacher' : 'Parent'} • {contact.studentName}
+                            {contact.role === 'teacher' ? 'Manager' : 'HR'} • {contact.studentName}
                           </p>
                           <p className="text-xs text-gray-400 dark:text-gray-500">
                             USN: {contact.studentUSN}
@@ -446,15 +445,19 @@ const MentorConnect = () => {
                     </div>
                   </div>
 
-                  {user?.role === 'teacher' && (
+                  <div className="flex gap-2">
                     <button
-                      onClick={() => setShowNewMeeting(true)}
+                      onClick={() => {
+                        const link = `${window.location.origin}/meeting/new`;
+                        // Can add logic to copy a generic link if needed, or just schedule
+                        setShowNewMeeting(true);
+                      }}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
                     >
                       <FiVideo className="w-4 h-4" />
                       Schedule Meeting
                     </button>
-                  )}
+                  </div>
                 </div>
 
                 {/* Messages */}
@@ -575,9 +578,9 @@ const MentorConnect = () => {
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
                 <FiVideo className="w-24 h-24 mb-6 text-blue-200 dark:text-blue-800" />
-                <h2 className="text-2xl font-bold mb-2">Welcome to Mentor Connect</h2>
+                <h2 className="text-2xl font-bold mb-2">Welcome to Executive Mentorship</h2>
                 <p className="text-center max-w-md">
-                  Select a contact from the sidebar to start chatting or schedule a video meeting
+                  Select a contact from the sidebar to start chatting or schedule a professional briefing
                 </p>
               </div>
             )}
@@ -657,17 +660,33 @@ const MentorConnect = () => {
                             </div>
                             <div className="flex items-center gap-2">
                               <FiUser className="w-4 h-4" />
-                              {meeting.teacherName} • {meeting.parentName}
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Host: {meeting.teacherName || 'User'} {meeting.parentName ? `• Guest: ${meeting.parentName}` : ''}
+                              </span>
                             </div>
                           </div>
 
                           {meeting.status === 'Scheduled' && (
-                            <button
-                              onClick={() => window.open(meeting.meetingLink, '_blank')}
-                              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition"
-                            >
-                              Join Meeting
-                            </button>
+                            <div className="flex gap-2 mt-4">
+                              <button
+                                onClick={() => window.open(meeting.meetingLink, '_blank')}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition text-center"
+                              >
+                                Join Meeting
+                              </button>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(meeting.meetingLink);
+                                  alert('Meeting link copied to clipboard!');
+                                }}
+                                className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center"
+                                title="Copy Link"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                              </button>
+                            </div>
                           )}
                         </motion.div>
                       ))}
@@ -733,7 +752,7 @@ const MentorConnect = () => {
                       name="title"
                       required
                       className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Parent-Teacher Meeting"
+                      placeholder="e.g. 1-on-1 Sync, HR Briefing"
                     />
                   </div>
 
@@ -745,7 +764,7 @@ const MentorConnect = () => {
                       name="description"
                       rows="3"
                       className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Discuss student progress and performance"
+                      placeholder="Discuss project updates and performance"
                     ></textarea>
                   </div>
 
@@ -782,11 +801,15 @@ const MentorConnect = () => {
                     </label>
                     <select
                       name="platform"
-                      className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-1"
                     >
-                      <option value="Jitsi">Jitsi Meet</option>
-                      <option value="WebRTC">WebRTC (Browser)</option>
+                      <option value="Jitsi">Jitsi Meet (Recommended)</option>
+                      <option value="WebRTC">WebRTC (Direct Browser)</option>
                     </select>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <strong>Jitsi Meet</strong> provides a stable, full-featured external meeting room. <br/>
+                      <strong>WebRTC</strong> connects directly within the browser tab (best for quick 1-on-1s).
+                    </p>
                   </div>
 
                   <div className="flex gap-3">

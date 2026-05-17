@@ -4,8 +4,8 @@ import {
   Heart, TrendingUp, MessageSquare, Calendar, Shield,
   AlertCircle, CheckCircle, Loader, Brain, Activity
 } from 'lucide-react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
+import PageHeader from '../components/PageHeader';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -74,19 +74,13 @@ const ParentWellbeingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-            <Heart className="text-purple-600" size={36} />
-            Student Well-being Dashboard
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Monitor your child's emotional health and concerns
-          </p>
-        </div>
-
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader 
+        title="Employee Well-being Dashboard" 
+        subtitle="Monitor your team's well-being and feedback" 
+        icon={Heart} 
+      />
+      <div className="max-w-6xl mx-auto p-6">
         {/* Emotional Health Summary */}
         {emotionalHealth ? (
           <motion.div
@@ -148,13 +142,13 @@ const ParentWellbeingPage = () => {
             </div>
           </motion.div>
         ) : (
-          <div className="bg-white rounded-xl p-8 mb-6 text-center">
+          <div className="bg-white rounded-xl p-8 mb-6 text-center mt-4">
             <Heart size={64} className="mx-auto text-gray-300 mb-4" />
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
-              No Recent Concerns
+              No Recent Feedback
             </h2>
             <p className="text-gray-600">
-              Your child hasn't shared any concerns recently. This is a positive sign!
+              Your team hasn't shared any feedback recently. This is a positive sign!
             </p>
           </div>
         )}
@@ -166,7 +160,7 @@ const ParentWellbeingPage = () => {
             <div>
               <h3 className="font-semibold text-blue-900 mb-1">Privacy & Transparency</h3>
               <p className="text-sm text-blue-800">
-                You can only see concerns that your child has explicitly chosen to share with you. 
+                You can only see feedback that employees have explicitly chosen to share with you. 
                 This respects their privacy while keeping you informed about important matters.
               </p>
             </div>
@@ -177,17 +171,17 @@ const ParentWellbeingPage = () => {
         <div>
           <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <MessageSquare size={24} className="text-purple-600" />
-            Shared Concerns ({sharedConfessions.length})
+            Shared Feedback ({sharedConfessions.length})
           </h2>
 
           {sharedConfessions.length === 0 ? (
             <div className="bg-white rounded-xl p-12 text-center">
               <Shield size={64} className="mx-auto text-gray-300 mb-4" />
               <p className="text-xl text-gray-500 mb-2">
-                No concerns shared with you yet
+                No feedback shared with you yet
               </p>
               <p className="text-gray-400">
-                Your child can choose to share their concerns with you when submitting them.
+                Employees can choose to share their feedback with you when submitting them.
               </p>
             </div>
           ) : (
@@ -253,7 +247,7 @@ const ParentWellbeingPage = () => {
                     <div className="border-t pt-4">
                       <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                         <MessageSquare size={16} />
-                        School Responses ({confession.responses.length})
+                        HR Responses ({confession.responses.length})
                       </h4>
                       <div className="space-y-2">
                         {confession.responses.map((response, respIdx) => (
@@ -300,19 +294,19 @@ const ParentWellbeingPage = () => {
           <ul className="space-y-2 text-sm text-gray-700">
             <li className="flex items-start gap-2">
               <CheckCircle size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
-              <span><strong>Maintain open communication:</strong> Create a safe space for your child to share their feelings</span>
+              <span><strong>Maintain open communication:</strong> Create a safe space for your team to share their feedback</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
-              <span><strong>Regular check-ins:</strong> Ask about their day and listen actively without judgment</span>
+              <span><strong>Regular check-ins:</strong> Ask about their work and listen actively without judgment</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
-              <span><strong>Work with the school:</strong> The concerns shown here are being addressed by our staff</span>
+              <span><strong>Work with the HR:</strong> The concerns shown here are being addressed by our HR staff</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
-              <span><strong>Professional support:</strong> Don't hesitate to seek counseling if concerns persist</span>
+              <span><strong>Professional support:</strong> Don't hesitate to seek HR support if concerns persist</span>
             </li>
           </ul>
         </div>

@@ -14,8 +14,12 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
+import { useAuth } from '../../context/AuthContext';
 
 const LiveInterviewSession = () => {
+  const { user } = useAuth();
   const { sessionId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -245,45 +249,50 @@ const LiveInterviewSession = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Top Bar */}
-        <div className="bg-gray-800 rounded-lg p-4 mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-red-500" />
-              <span className="text-lg font-mono font-bold">
-                {formatTime(timeRemaining)}
-              </span>
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Role Transition Prep"
+    >
+      <div className="min-h-screen bg-gray-900 text-white p-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Top Bar - Inline Timer & Info */}
+          <div className="bg-gray-800 rounded-lg p-4 mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-red-500" />
+                <span className="text-lg font-mono font-bold">
+                  {formatTime(timeRemaining)}
+                </span>
+              </div>
+              
+              <div className="h-6 w-px bg-gray-600"></div>
+              
+              <div className="text-sm">
+                Question <span className="font-bold">{getCurrentQuestionNumber()}</span> of{' '}
+                <span className="font-bold">{getTotalQuestions()}</span>
+              </div>
             </div>
-            
-            <div className="h-6 w-px bg-gray-600"></div>
-            
-            <div className="text-sm">
-              Question <span className="font-bold">{getCurrentQuestionNumber()}</span> of{' '}
-              <span className="font-bold">{getTotalQuestions()}</span>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleMic}
-              className={`p-2 rounded-lg transition-colors ${
-                isMicOn ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
-              }`}
-            >
-              {isMicOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-            </button>
-            <button
-              onClick={toggleCamera}
-              className={`p-2 rounded-lg transition-colors ${
-                isCameraOn ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
-              }`}
-            >
-              {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleMic}
+                className={`p-2 rounded-lg transition-colors ${
+                  isMicOn ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
+                }`}
+              >
+                {isMicOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={toggleCamera}
+                className={`p-2 rounded-lg transition-colors ${
+                  isCameraOn ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
+                }`}
+              >
+                {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
-        </div>
 
         {/* Progress Bar */}
         <div className="bg-gray-800 rounded-full h-2 mb-6 overflow-hidden">
@@ -424,6 +433,7 @@ const LiveInterviewSession = () => {
         </div>
       </div>
     </div>
+    </DashboardLayout>
   );
 };
 

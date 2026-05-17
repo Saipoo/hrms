@@ -18,6 +18,8 @@ import {
   Send,
   X
 } from 'lucide-react';
+import DashboardLayout from '../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../constants/menuItems';
 
 const CareerAdvisor = () => {
   const { user } = useAuth();
@@ -262,7 +264,7 @@ const CareerAdvisor = () => {
         <button
           onClick={() => setShowChat(true)}
           className="fixed bottom-6 right-6 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-all hover:scale-110 z-50"
-          title="Chat with AI Career Advisor"
+          title="Chat with WorkSphere HR Growth Advisor"
         >
           <MessageCircle className="w-6 h-6" />
         </button>
@@ -276,7 +278,7 @@ const CareerAdvisor = () => {
                 <div className="flex items-center gap-3">
                   <Sparkles className="w-6 h-6" />
                   <div>
-                    <h3 className="font-bold text-lg">AI Career Advisor</h3>
+                    <h3 className="font-bold text-lg">HR Growth Advisor</h3>
                     <p className="text-xs text-indigo-100">Get personalized career guidance</p>
                   </div>
                 </div>
@@ -386,7 +388,7 @@ const CareerAdvisor = () => {
         <button
           onClick={() => setShowChat(true)}
           className="fixed bottom-6 right-6 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-all hover:scale-110 z-50"
-          title="Chat with AI Career Advisor"
+          title="Chat with WorkSphere HR Growth Advisor"
         >
           <MessageCircle className="w-6 h-6" />
         </button>
@@ -399,7 +401,7 @@ const CareerAdvisor = () => {
                 <div className="flex items-center gap-3">
                   <Sparkles className="w-6 h-6" />
                   <div>
-                    <h3 className="font-bold text-lg">AI Career Advisor</h3>
+                    <h3 className="font-bold text-lg">HR Growth Advisor</h3>
                     <p className="text-xs text-indigo-100">Get personalized career guidance</p>
                   </div>
                 </div>
@@ -497,19 +499,18 @@ const CareerAdvisor = () => {
   } = dashboardData || {};
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Career Growth AI"
+    >
+      <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header Actions */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <Briefcase className="w-8 h-8 text-indigo-600" />
-                Career Advisor
-              </h1>
-              <p className="text-gray-600 mt-2">
-                AI-powered career guidance and development
-              </p>
+            <div className="text-gray-600">
+              Your personalized career dashboard
             </div>
             
             <div className="flex items-center gap-4">
@@ -1093,7 +1094,7 @@ const CareerAdvisor = () => {
       <button
         onClick={() => setShowChat(true)}
         className="fixed bottom-6 right-6 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-all hover:scale-110 z-40"
-        title="Chat with AI Career Advisor"
+        title="Chat with WorkSphere HR Growth Advisor"
       >
         <MessageCircle className="w-6 h-6" />
       </button>
@@ -1200,6 +1201,7 @@ const CareerAdvisor = () => {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 };
 

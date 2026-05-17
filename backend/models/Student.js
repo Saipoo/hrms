@@ -20,9 +20,9 @@ const studentSchema = new mongoose.Schema({
     minlength: 6,
     select: false
   },
-  usn: {
+  empid: {
     type: String,
-    required: [true, 'USN is required'],
+    required: [true, 'EmpID is required'],
     unique: true,
     uppercase: true,
     trim: true
@@ -32,16 +32,20 @@ const studentSchema = new mongoose.Schema({
     required: [true, 'Department is required'],
     trim: true
   },
-  class: {
+  designation: {
     type: String,
-    required: [true, 'Class is required'],
+    required: [true, 'Designation is required'],
     trim: true
   },
-  section: {
+  team: {
     type: String,
-    required: [true, 'Section is required'],
+    required: [true, 'Team is required'],
     trim: true,
     uppercase: true
+  },
+  profilePhoto: {
+    type: String,
+    default: ''
   },
   role: {
     type: String,

@@ -5,8 +5,12 @@ import {
   ChevronRight, Calendar, Target, Code, TrendingUp
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '../../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../../constants/menuItems';
+import { useAuth } from '../../../context/AuthContext';
 
 const HackathonChallenges = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [hackathons, setHackathons] = useState([]);
   const [myParticipations, setMyParticipations] = useState([]);
@@ -120,25 +124,12 @@ const HackathonChallenges = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-teal-50 p-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-3 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl">
-            <Trophy className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
-              Hackathon Challenges
-            </h1>
-            <p className="text-gray-600 mt-1">Compete, collaborate, and win prizes</p>
-          </div>
-        </div>
-      </motion.div>
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Innovation Hackathons"
+    >
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-teal-50 p-6">
 
       {/* Tabs */}
       <div className="flex gap-4 mb-6">
@@ -402,6 +393,7 @@ const HackathonChallenges = () => {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 };
 

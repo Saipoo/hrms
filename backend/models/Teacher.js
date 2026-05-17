@@ -20,14 +20,25 @@ const teacherSchema = new mongoose.Schema({
     minlength: 6,
     select: false
   },
+  empid: {
+    type: String,
+    required: [true, 'EmpID is required'],
+    unique: true,
+    uppercase: true,
+    trim: true
+  },
   department: {
     type: String,
     required: [true, 'Department is required'],
     trim: true
   },
-  subjects: {
+  projects: {
     type: [String],
-    required: [true, 'At least one subject is required']
+    required: [true, 'At least one project is required']
+  },
+  profilePhoto: {
+    type: String,
+    default: ''
   },
   role: {
     type: String,

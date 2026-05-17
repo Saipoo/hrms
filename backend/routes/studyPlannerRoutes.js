@@ -7,10 +7,10 @@ import Parent from '../models/Parent.js';
 import { protect, authorize } from '../middleware/auth.js';
 import {
   generateWeeklySchedule,
-  analyzeWeakSubjects,
+  analyzePerformanceGaps,
   generateRecommendations,
-  optimizePomodoroSession,
-  generateSubjectStudyTips
+  optimizeFocusSession,
+  generateSkillAdvancementTips
 } from '../services/studyPlannerAIService.js';
 
 const router = express.Router();
@@ -26,7 +26,7 @@ router.post('/create', protect, authorize('student'), async (req, res) => {
 
     // Check if plan already exists for this semester
     const existingPlan = await StudyPlan.findOne({
-      usn: req.user.usn,
+      empid: req.user.empid,
       semester,
       academicYear
     });
@@ -40,7 +40,7 @@ router.post('/create', protect, authorize('student'), async (req, res) => {
 
     // Create new study plan
     const studyPlan = await StudyPlan.create({
-      usn: req.user.usn,
+      empid: req.user.empid,
       studentName: req.user.name,
       semester,
       academicYear,
@@ -70,7 +70,7 @@ router.get('/my-plan', protect, authorize('student'), async (req, res) => {
   try {
     const { semester, academicYear } = req.query;
 
-    let query = { usn: req.user.usn };
+    let query = { empid: req.user.empid };
     
     if (semester) query.semester = parseInt(semester);
     if (academicYear) query.academicYear = academicYear;
@@ -113,7 +113,7 @@ router.put('/update/:id', protect, authorize('student'), async (req, res) => {
     }
 
     // Verify ownership
-    if (studyPlan.usn !== req.user.usn) {
+    if (studyPlan.empid !== req.user.empid) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this study plan'
@@ -162,7 +162,7 @@ router.post('/task', protect, authorize('student'), async (req, res) => {
     }
 
     // Verify ownership
-    if (studyPlan.usn !== req.user.usn) {
+    if (studyPlan.empid !== req.user.empid) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to modify this study plan'
@@ -214,7 +214,7 @@ router.put('/task/:taskId', protect, authorize('student'), async (req, res) => {
     }
 
     // Verify ownership
-    if (studyPlan.usn !== req.user.usn) {
+    if (studyPlan.empid !== req.user.empid) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to modify this study plan'
@@ -292,7 +292,7 @@ router.delete('/task/:taskId', protect, authorize('student'), async (req, res) =
     }
 
     // Verify ownership
-    if (studyPlan.usn !== req.user.usn) {
+    if (studyPlan.empid !== req.user.empid) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to modify this study plan'
@@ -323,7 +323,7 @@ router.delete('/task/:taskId', protect, authorize('student'), async (req, res) =
 // @access  Private (Student)
 router.get('/tasks/overdue', protect, authorize('student'), async (req, res) => {
   try {
-    const studyPlan = await StudyPlan.findOne({ usn: req.user.usn }).sort({ createdAt: -1 });
+    const studyPlan = await StudyPlan.findOne({ empid: req.user.empid }).sort({ createdAt: -1 });
 
     if (!studyPlan) {
       return res.status(404).json({
@@ -355,7 +355,7 @@ router.get('/tasks/upcoming', protect, authorize('student'), async (req, res) =>
   try {
     const { days = 7 } = req.query;
 
-    const studyPlan = await StudyPlan.findOne({ usn: req.user.usn }).sort({ createdAt: -1 });
+    const studyPlan = await StudyPlan.findOne({ empid: req.user.empid }).sort({ createdAt: -1 });
 
     if (!studyPlan) {
       return res.status(404).json({
@@ -399,7 +399,7 @@ router.post('/goal', protect, authorize('student'), async (req, res) => {
     }
 
     // Verify ownership
-    if (studyPlan.usn !== req.user.usn) {
+    if (studyPlan.empid !== req.user.empid) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to modify this study plan'
@@ -450,7 +450,7 @@ router.put('/goal/:goalId', protect, authorize('student'), async (req, res) => {
     }
 
     // Verify ownership
-    if (studyPlan.usn !== req.user.usn) {
+    if (studyPlan.empid !== req.user.empid) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to modify this study plan'
@@ -500,7 +500,7 @@ router.post('/generate-schedule', protect, authorize('student'), async (req, res
   try {
     const { planId, preferences } = req.body;
 
-    console.log('Generate schedule request:', { planId, preferences, usn: req.user.usn });
+    console.log('Generate schedule request:', { planId, preferences, empid: req.user.empid });
 
     // If no planId, try to find the latest study plan
     let studyPlan;
@@ -508,7 +508,7 @@ router.post('/generate-schedule', protect, authorize('student'), async (req, res
       studyPlan = await StudyPlan.findById(planId);
     } else {
       // Find the most recent study plan for this student
-      studyPlan = await StudyPlan.findOne({ usn: req.user.usn }).sort({ createdAt: -1 });
+      studyPlan = await StudyPlan.findOne({ empid: req.user.empid }).sort({ createdAt: -1 });
     }
 
     if (!studyPlan) {
@@ -519,7 +519,7 @@ router.post('/generate-schedule', protect, authorize('student'), async (req, res
     }
 
     // Verify ownership
-    if (studyPlan.usn !== req.user.usn) {
+    if (studyPlan.empid !== req.user.empid) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to modify this study plan'
@@ -527,14 +527,14 @@ router.post('/generate-schedule', protect, authorize('student'), async (req, res
     }
 
     // Get student's academic data
-    const grades = await Grade.find({ usn: req.user.usn }).sort({ createdAt: -1 }).limit(10);
+    const grades = await Grade.find({ empid: req.user.empid }).sort({ createdAt: -1 }).limit(10);
 
     // Get preferences from request body (from wizard) or use existing
     const userPreferences = preferences || req.body.preferences || studyPlan.preferences || {};
 
     // Prepare student data for AI with enhanced preferences
     const studentData = {
-      usn: req.user.usn,
+      empid: req.user.empid,
       name: req.user.name,
       semester: studyPlan.semester,
       weeklyGoalHours: studyPlan.weeklyGoalHours,
@@ -671,7 +671,7 @@ router.post('/generate-schedule', protect, authorize('student'), async (req, res
 // @access  Private (Student)
 router.get('/recommendations', protect, authorize('student'), async (req, res) => {
   try {
-    const studyPlan = await StudyPlan.findOne({ usn: req.user.usn }).sort({ createdAt: -1 });
+    const studyPlan = await StudyPlan.findOne({ empid: req.user.empid }).sort({ createdAt: -1 });
 
     if (!studyPlan) {
       return res.status(404).json({
@@ -687,10 +687,10 @@ router.get('/recommendations', protect, authorize('student'), async (req, res) =
 
     // If no active recommendations or less than 3, generate new ones
     if (activeRecommendations.length < 3) {
-      const grades = await Grade.find({ usn: req.user.usn }).sort({ createdAt: -1 }).limit(10);
+      const grades = await Grade.find({ empid: req.user.empid }).sort({ createdAt: -1 }).limit(10);
 
       const studentProfile = {
-        usn: req.user.usn,
+        empid: req.user.empid,
         name: req.user.name,
         semester: studyPlan.semester,
         weakSubjects: studyPlan.weakSubjects,
@@ -747,7 +747,7 @@ router.post('/sync-weak-subjects', protect, authorize('student'), async (req, re
     }
 
     // Verify ownership
-    if (studyPlan.usn !== req.user.usn) {
+    if (studyPlan.empid !== req.user.empid) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to modify this study plan'
@@ -756,7 +756,7 @@ router.post('/sync-weak-subjects', protect, authorize('student'), async (req, re
 
     // Get recent grades
     const grades = await Grade.find({
-      usn: req.user.usn,
+      empid: req.user.empid,
       semester: studyPlan.semester
     }).sort({ createdAt: -1 });
 
@@ -771,7 +771,7 @@ router.post('/sync-weak-subjects', protect, authorize('student'), async (req, re
       semester: studyPlan.semester
     };
 
-    const weakSubjectAnalysis = await analyzeWeakSubjects(academicData);
+    const weakSubjectAnalysis = await analyzePerformanceGaps(academicData);
 
     // Update weak subjects in study plan
     studyPlan.weakSubjects = weakSubjectAnalysis;

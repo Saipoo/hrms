@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiFileText, FiUpload, FiCheckCircle, FiClock, FiAward, FiEye, FiTrendingUp, FiBook, FiLoader } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+import PageHeader from '../../components/PageHeader';
 
 const GradeEvaluator = () => {
   const { user } = useAuth();
@@ -150,28 +151,13 @@ const GradeEvaluator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center gap-4 mb-2">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl">
-              <FiBook className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-                Grade Evaluator
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400">
-                AI-Powered Answer Script Evaluation System
-              </p>
-            </div>
-          </div>
-        </motion.div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <PageHeader 
+        title="Performance Evaluator" 
+        subtitle="AI-Powered Performance Review System" 
+        icon={FiBook} 
+      />
+      <div className="max-w-7xl mx-auto p-6">
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Submissions List */}

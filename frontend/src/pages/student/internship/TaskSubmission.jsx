@@ -5,8 +5,12 @@ import {
   Lightbulb, MessageCircle, Loader, CheckCircle, X
 } from 'lucide-react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import DashboardLayout from '../../../components/DashboardLayout';
+import { EMPLOYEE_MENU } from '../../../constants/menuItems';
+import { useAuth } from '../../../context/AuthContext';
 
 const TaskSubmission = () => {
+  const { user } = useAuth();
   const { taskId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -192,13 +196,17 @@ const TaskSubmission = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 p-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
+    <DashboardLayout 
+      menuItems={EMPLOYEE_MENU} 
+      role={user?.role || 'student'}
+      title="Task Submission"
+    >
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 p-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors mb-4"
@@ -451,6 +459,7 @@ const TaskSubmission = () => {
         </motion.div>
       )}
     </div>
+    </DashboardLayout>
   );
 };
 

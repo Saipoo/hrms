@@ -11,7 +11,7 @@ const certificateSchema = new mongoose.Schema({
     ref: 'Student',
     required: true
   },
-  studentUSN: {
+  empid: {
     type: String,
     required: true
   },
@@ -65,7 +65,7 @@ const certificateSchema = new mongoose.Schema({
 
 // Indexes
 certificateSchema.index({ certificateId: 1 });
-certificateSchema.index({ studentUSN: 1 });
+certificateSchema.index({ empid: 1 });
 certificateSchema.index({ courseId: 1 });
 
 const Certificate = mongoose.model('Certificate', certificateSchema);
