@@ -344,7 +344,7 @@ const HRDashboard = () => {
               Monitor your employee's attendance and performance in real-time
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3 justify-end items-center max-w-5xl">
             <Link
               to="/mentor-connect"
               className="btn btn-primary flex items-center gap-2"

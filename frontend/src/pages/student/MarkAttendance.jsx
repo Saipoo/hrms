@@ -78,7 +78,13 @@ const MarkAttendance = () => {
     api.get('/attendance/office-location')
       .then(res => {
         if (res.data.success && res.data.data) {
-          setOfficeLocation(res.data.data);
+          const loc = res.data.data;
+          setOfficeLocation({
+            ...loc,
+            latitude: parseFloat(loc.latitude),
+            longitude: parseFloat(loc.longitude),
+            radius: parseFloat(loc.radius || 100)
+          });
         }
       })
       .catch(() => console.warn('No office location configured yet'));

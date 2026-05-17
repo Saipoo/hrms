@@ -335,7 +335,18 @@ const TimetableManagement = () => {
                     required
                   >
                     <option value="">Select Shift / Task</option>
-                    {user?.subjects?.map((subject) => (
+                    {((user?.subjects && user.subjects.length > 0) ? user.subjects : [
+                      'General Shift',
+                      'Morning Shift',
+                      'Evening Shift',
+                      'Remote Work',
+                      'On-Call Duty',
+                      'Technical Support',
+                      'Project Meeting',
+                      'Client Support',
+                      'Design Review',
+                      'Dev Standup'
+                    ]).map((subject) => (
                       <option key={subject} value={subject}>
                         {subject}
                       </option>
