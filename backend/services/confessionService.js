@@ -5,8 +5,11 @@ import Student from '../models/Student.js';
 import Teacher from '../models/Teacher.js';
 import Parent from '../models/Parent.js';
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Dynamic Gemini AI Client getter to handle ES6 module load timing differences
+const getGenAI = () => {
+  const apiKey = process.env.GEMINI_API_KEY || '';
+  return new GoogleGenerativeAI(apiKey);
+};
 
 // Encryption utilities
 // AES-256 requires a 32-byte key
@@ -88,6 +91,7 @@ function createContentHash(text) {
  */
 async function analyzeSentiment(content) {
   try {
+    const genAI = getGenAI();
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     
     const prompt = `Analyze the following student confession/complaint and provide:
@@ -151,6 +155,7 @@ Respond in JSON format:
  */
 async function generateEmpatheticResponse(content, category) {
   try {
+    const genAI = getGenAI();
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     
     const prompt = `You are a compassionate counselor for students. A student has shared the following ${category.toLowerCase()}:
