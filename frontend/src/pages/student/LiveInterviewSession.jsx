@@ -227,7 +227,7 @@ const LiveInterviewSession = () => {
 
       if (response.data.success) {
         toast.success('Interview completed! Generating your report...');
-        navigate(`/dashboard/student/interview/results/${response.data.reportId}`);
+        navigate(`/dashboard/employee/interview/results/${response.data.reportId}`);
       }
     } catch (error) {
       console.error('Error completing interview:', error);

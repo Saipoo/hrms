@@ -86,7 +86,7 @@ const InterviewSimulator = () => {
 
       if (response.data.success) {
         toast.success('Interview session started!');
-        navigate(`/dashboard/student/interview/session/${response.data.sessionId}`, {
+        navigate(`/dashboard/employee/interview/session/${response.data.sessionId}`, {
           state: {
             sessionId: response.data.sessionId,
             questions: response.data.questions,
@@ -228,7 +228,7 @@ const InterviewSimulator = () => {
                   key={interview._id}
                   whileHover={{ scale: 1.02 }}
                   className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow cursor-pointer"
-                  onClick={() => navigate(`/dashboard/student/interview/results/${interview._id}`)}
+                  onClick={() => navigate(`/dashboard/employee/interview/results/${interview._id}`)}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-gray-800 dark:text-white">

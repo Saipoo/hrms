@@ -51,7 +51,7 @@ const InterviewResults = () => {
   };
 
   const retryInterview = () => {
-    navigate('/dashboard/student/interview');
+    navigate('/dashboard/employee/interview');
   };
 
   const getScoreColor = (score) => {
@@ -110,7 +110,7 @@ const InterviewResults = () => {
             Report Not Found
           </h2>
           <button
-            onClick={() => navigate('/dashboard/student/interview')}
+            onClick={() => navigate('/dashboard/employee/interview')}
             className="mt-4 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
           >
             Back to Interview Simulator
@@ -129,7 +129,7 @@ const InterviewResults = () => {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
           <button
-            onClick={() => navigate('/dashboard/student/interview')}
+            onClick={() => navigate('/dashboard/employee/interview')}
             className="mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -320,7 +320,7 @@ const InterviewResults = () => {
               <div
                 key={idx}
                 className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-primary-500 dark:hover:border-primary-500 transition-colors cursor-pointer"
-                onClick={() => navigate('/dashboard/student/course-master')}
+                onClick={() => navigate('/dashboard/employee/course-master')}
               >
                 <h4 className="font-semibold text-gray-800 dark:text-white mb-2">
                   {course.title}
